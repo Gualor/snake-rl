@@ -1,5 +1,6 @@
 /* Include libraries ---------------------------------------------------------*/
 
+#include "display.h"
 #include "snake.h"
 
 /* Main function -------------------------------------------------------------*/
@@ -8,24 +9,28 @@ int main(void)
 {
     /* Game initialization ---------------------------------------------------*/
 
-    snake_init();
+    game_mat_t *game_matrix = game_mat_init();
+    snake_t *snake = snake_init(0);
+    display_t *display = display_init(FPS, SCREEN_WIDTH, SCREEN_HEIGHT,
+                                      GAME_MATRIX_COLS, GAME_MATRIX_ROWS);
 
     /* Main game loop --------------------------------------------------------*/
 
-    while (!snake_exit())
+    while (!display_exit())
     {
         /* Update ------------------------------------------------------------*/
 
-        snake_update_matrix(&snake, &food);
-
         /* Begin drawing -----------------------------------------------------*/
 
-        snake_draw();
+        display_draw(display, game_matrix);
 
         /* End drawing -------------------------------------------------------*/
     }
 
-    snake_deinit();
+    game_mat_deinit(game_matrix);
+    snake_deinit(snake);
+    display_deinit(display);
+
     return 0;
 }
 

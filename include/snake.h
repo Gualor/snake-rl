@@ -5,42 +5,28 @@
 
 /* Include libraries ---------------------------------------------------------*/
 
-#include <raylib.h>
+#include <stdint.h>
 
 /* Definitions ---------------------------------------------------------------*/
 
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 450
+#define GAME_MATRIX_COLS 32
+#define GAME_MATRIX_ROWS 18
 
-#define MATRIX_COLS 32
-#define MATRIX_ROWS 18
-
-#define FPS 60
-
-#define SNAKE_INIT_POS \
-    (snake_pos_t) { 16, 9 }
-#define SNAKE_INIT_LENGTH 1
 #define SNAKE_MAX_LENGTH 100
 
-#define FOOD_INIT_NUM 0
-#define FOOD_MAX_NUM 100
+/* Public typedefs -----------------------------------------------------------*/
 
-#define RESET_COLOR \
-    (Color) { 0x0, 0x0, 0x0, 0x0 }
-#define BACKGROUND_COLOR \
-    (Color) { 0x12, 0x12, 0x12, 0xff }
-#define BACKGROUND_ALT_COLOR \
-    (Color) { 0x12, 0x12, 0x12, 0x7f }
-#define GRID_COLOR \
-    (Color) { 0x12, 0x12, 0x12, 0x7f }
-#define SNAKE_HEAD_COLOR \
-    (Color) { 0x03, 0xda, 0x59, 0xff }
-#define SNAKE_BODY_COLOR \
-    (Color) { 0x03, 0xda, 0x59, 0xff }
-#define FOOD_COLOR \
-    (Color) { 0xda, 0x03, 0x18, 0xff }
+typedef struct
+{
+    uint16_t x;
+    uint16_t y;
+} game_pos_t;
 
-/* Public typedef ------------------------------------------------------------*/
+typedef struct
+{
+    int8_t x;
+    int8_t y;
+} game_dir_t;
 
 typedef enum
 {
@@ -48,46 +34,41 @@ typedef enum
     SNAKE_HEAD,
     SNAKE_BODY,
     FOOD
-} snake_obj_t;
+} game_obj_t;
 
-typedef struct snake_pos
+typedef struct
 {
-    int x;
-    int y;
-} snake_pos_t;
-
-typedef snake_pos_t food_pos_t;
+    game_obj_t **state;
+    uint16_t width;
+    uint16_t height;
+} game_mat_t;
 
 typedef struct snake
 {
-    snake_pos_t *pos;
-    int length;
+    uint16_t id;
+    uint16_t length;
+    game_dir_t dir;
+    game_pos_t *pos;
 } snake_t;
 
 typedef struct food
 {
-    food_pos_t *pos;
-    int num;
+    uint16_t num;
+    game_pos_t *pos;
 } food_t;
 
 /* Public functions ----------------------------------------------------------*/
 
-void snake_init(void);
-void snake_deinit(void);
-bool snake_exit(void);
-void snake_draw(void);
+game_mat_t *game_mat_init(void);
+void game_mat_deinit(game_mat_t *gmat);
+void game_mat_update(game_mat_t *gmat, snake_t *snake, food_t *food);
+void game_mat_reset(game_mat_t *gmat);
 
-void snake_update_matrix(snake_t *snake, food_t *food);
-
-/* Global variables ----------------------------------------------------------*/
-
-snake_obj_t game_matrix[MATRIX_COLS][MATRIX_ROWS];
-
-snake_t snake;
-snake_pos_t snake_pos[SNAKE_MAX_LENGTH];
-
-food_t food;
-food_pos_t food_pos[FOOD_MAX_NUM];
+snake_t *snake_init(uint16_t id);
+void snake_deinit(snake_t *snake);
+void snake_move(snake_t *snake, game_dir_t dir);
+void snake_update(snake_t *snake);
+void snake_change_dir(snake_t *snake, game_dir_t dir);
 
 #endif /* _SNAKE_H_ */
 

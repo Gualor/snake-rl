@@ -1,186 +1,106 @@
 /* Include libraries ---------------------------------------------------------*/
 
+#include <stdlib.h>
 #include <string.h>
 #include "snake.h"
 
-/* Private variables ---------------------------------------------------------*/
+/* Game matrix functions -----------------------------------------------------*/
 
-static const int pixel_width = SCREEN_WIDTH / MATRIX_COLS;
-static const int pixel_height = SCREEN_HEIGHT / MATRIX_ROWS;
-
-/* Private prototypes --------------------------------------------------------*/
-
-void snake_draw_objects(void);
-void snake_draw_background(void);
-void snake_draw_grid(void);
-
-void snake_init_game_matrix(void);
-void snake_init_objects(void);
-
-/* Function definitions ------------------------------------------------------*/
-
-void snake_init(void)
+game_mat_t *game_mat_init(void)
 {
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Snake RL");
-    SetTargetFPS(FPS);
+    game_mat_t *gmat = calloc(1, sizeof(game_mat_t));
+    game_obj_t **state = calloc(GAME_MATRIX_COLS, sizeof(game_obj_t *));
 
-    snake_init_game_matrix();
-    snake_init_objects();
-}
-
-void snake_init_objects(void)
-{
-    snake_t s = {.pos = snake_pos, .length = SNAKE_INIT_LENGTH};
-    food_t f = {.pos = food_pos, .num = FOOD_INIT_NUM};
-
-    memset(snake_pos, 0, sizeof(snake_pos_t) * SNAKE_MAX_LENGTH);
-    memset(food_pos, 0, sizeof(food_pos_t) * FOOD_MAX_NUM);
-
-    snake_pos[0] = SNAKE_INIT_POS;
-    snake = s;
-    food = f;
-}
-
-void snake_init_game_matrix(void)
-{
-    for (int x = 0; x < MATRIX_COLS; x++)
+    for (uint16_t x = 0; x < GAME_MATRIX_COLS; x++)
     {
-        for (int y = 0; y < MATRIX_ROWS; y++)
+        game_obj_t *col = calloc(GAME_MATRIX_ROWS, sizeof(game_obj_t));
+        state[x] = col;
+    }
+
+    gmat->state = state;
+    gmat->width = GAME_MATRIX_ROWS;
+    gmat->height = GAME_MATRIX_ROWS;
+
+    return gmat;
+}
+
+void game_mat_deinit(game_mat_t *gmat)
+{
+    for (uint16_t x = 0; x < gmat->width; x++)
+    {
+        free(gmat->state[x]);
+    }
+    free(gmat->state);
+}
+
+void game_mat_update(game_mat_t *gmat, snake_t *snake, food_t *food)
+{
+    // Update snake position on board
+    gmat->state[snake->pos[0].x][snake->pos[0].y] = SNAKE_HEAD;
+    for (uint16_t i = 1; i < snake->length; i++)
+    {
+        gmat->state[snake->pos[i].x][snake->pos[i].y] = SNAKE_BODY;
+    }
+
+    // Update food position on board
+    for (uint16_t i = 0; i < food->num; i++)
+    {
+        gmat->state[food->pos[i].x][food->pos[i].y] = FOOD;
+    }
+}
+
+void game_mat_reset(game_mat_t *gmat)
+{
+    for (uint16_t x = 0; x < gmat->width; x++)
+    {
+        for (uint16_t y = 0; y < gmat->height; y++)
         {
-            game_matrix[x][y] = EMPTY_CELL;
+            gmat->state[x][y] = EMPTY_CELL;
         }
     }
 }
 
-void snake_deinit(void)
+/* Snake functions -----------------------------------------------------------*/
+
+snake_t *snake_init(uint16_t id)
 {
-    CloseWindow();
+    snake_t *snake = calloc(1, sizeof(snake_t));
+    game_pos_t *pos = calloc(SNAKE_MAX_LENGTH, sizeof(game_pos_t));
+
+    snake->id = id;
+    snake->length = 1;
+    snake->dir = (game_dir_t){1, 0};
+    snake->pos = pos;
+
+    return snake;
 }
 
-bool snake_exit(void)
+void snake_deinit(snake_t *snake)
 {
-    return WindowShouldClose();
+    free(snake->pos);
+    free(snake);
 }
 
-void snake_update_matrix(snake_t *snake, food_t *food)
+void snake_move(snake_t *snake, game_dir_t dir)
 {
-    game_matrix[snake->pos[0].x][snake->pos[0].y] = SNAKE_HEAD;
-    for (int i = 1; i < snake->length; i++)
+    snake_change_dir(snake, dir);
+    snake_update(snake);
+}
+
+void snake_update(snake_t *snake)
+{
+    for (uint16_t i = 0; i < snake->length; i++)
     {
-        game_matrix[snake->pos[i].x][snake->pos[i].y] = SNAKE_BODY;
-    }
-
-    for (int i = 0; i < food->num; i++)
-    {
-        game_matrix[food->pos[i].x][food->pos[i].y] = FOOD;
-    }
-}
-
-void snake_draw(void)
-{
-    BeginDrawing();
-
-    snake_draw_background();
-    snake_draw_objects();
-    snake_draw_grid();
-
-    EndDrawing();
-}
-
-void snake_draw_objects(void)
-{
-    for (int x = 0; x < MATRIX_COLS; x++)
-    {
-        for (int y = 0; y < MATRIX_ROWS; y++)
-        {
-            snake_obj_t obj = game_matrix[x][y];
-
-            if (obj != EMPTY_CELL)
-            {
-                Color color = RESET_COLOR;
-                switch (obj)
-                {
-                case SNAKE_HEAD:
-                    color = SNAKE_HEAD_COLOR;
-                    break;
-
-                case SNAKE_BODY:
-                    color = SNAKE_BODY_COLOR;
-                    break;
-
-                case FOOD:
-                    color = FOOD_COLOR;
-                    break;
-
-                default:
-                    break;
-                }
-
-                DrawRectangle(
-                    x * pixel_width,
-                    y * pixel_height,
-                    pixel_width,
-                    pixel_height,
-                    color);
-            }
-        }
+        snake->pos[i].x = (GAME_MATRIX_COLS + snake->pos[i].x + snake->dir.x) %
+                          GAME_MATRIX_COLS;
+        snake->pos[i].y = (GAME_MATRIX_ROWS + snake->pos[i].y + snake->dir.y) %
+                          GAME_MATRIX_ROWS;
     }
 }
 
-void snake_draw_background(void)
+void snake_change_dir(snake_t *snake, game_dir_t dir)
 {
-    ClearBackground(RESET_COLOR);
-
-    for (int x = 0; x < MATRIX_COLS; x++)
-    {
-        for (int y = 0; y < MATRIX_ROWS; y++)
-        {
-            Color color = RESET_COLOR;
-            if (x % 2 == 0)
-            {
-                if (y % 2 == 0)
-                {
-                    color = BACKGROUND_COLOR;
-                }
-                else
-                {
-                    color = BACKGROUND_ALT_COLOR;
-                }
-            }
-            else
-            {
-                if (y % 2 == 0)
-                {
-                    color = BACKGROUND_ALT_COLOR;
-                }
-                else
-                {
-                    color = BACKGROUND_COLOR;
-                }
-            }
-
-            DrawRectangle(
-                x * pixel_width,
-                y * pixel_height,
-                pixel_width,
-                pixel_height,
-                color);
-        }
-    }
-}
-
-void snake_draw_grid(void)
-{
-    for (int x = 0; x < MATRIX_COLS; x++)
-    {
-        int w = x * pixel_width;
-        DrawLine(w, 0, w, SCREEN_HEIGHT, GRID_COLOR);
-    }
-    for (int y = 0; y < MATRIX_ROWS; y++)
-    {
-        int h = y * pixel_height;
-        DrawLine(0, h, SCREEN_WIDTH, h, GRID_COLOR);
-    }
+    snake->dir = dir;
 }
 
 /*----------------------------------------------------------------------------*/
