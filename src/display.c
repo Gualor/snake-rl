@@ -1,26 +1,31 @@
 /* Include libraries ---------------------------------------------------------*/
 
+#include <stdlib.h>
 #include <string.h>
 #include "display.h"
 
 /* Public functions ----------------------------------------------------------*/
 
 display_t *display_init(uint16_t fps, uint16_t width, uint16_t height,
-                        uint16_t cols, uint16_t rows)
+                        uint16_t cols, uint16_t rows, color_pal_t palette)
 {
     InitWindow(width, height, "Snake RL");
-    SetTargetFPS(FPS);
+    SetTargetFPS(fps);
 
-    display_t *display = calloc(1, sizeof(display_t));
+    display_t display = {
+        .fps = fps,
+        .width = width,
+        .height = height,
+        .cols = cols,
+        .rows = rows,
+        .pixel_width = width / cols,
+        .pixel_height = height / rows,
+        .palette = palette};
 
-    display->width = width;
-    display->height = height;
-    display->cols = cols;
-    display->rows = rows;
-    display->pixel_width = width / cols;
-    display->pixel_height = height / rows;
+    display_t *display_ptr = malloc(sizeof(display_t));
+    memcpy(display_ptr, &display, sizeof(display_t));
 
-    return display;
+    return display_ptr;
 }
 
 void display_deinit(display_t *disp)
@@ -54,19 +59,19 @@ void display_draw_objects(display_t *disp, game_mat_t *gmat)
             game_obj_t obj = gmat->state[x][y];
             if (gmat->state[x][y] != EMPTY_CELL)
             {
-                Color color = RESET_COLOR;
+                Color color = disp->palette.reset;
                 switch (obj)
                 {
                 case SNAKE_HEAD:
-                    color = SNAKE_HEAD_COLOR;
+                    color = disp->palette.snake_head;
                     break;
 
                 case SNAKE_BODY:
-                    color = SNAKE_BODY_COLOR;
+                    color = disp->palette.snake_body;
                     break;
 
                 case FOOD:
-                    color = FOOD_COLOR;
+                    color = disp->palette.food;
                     break;
 
                 default:
@@ -86,33 +91,33 @@ void display_draw_objects(display_t *disp, game_mat_t *gmat)
 
 void display_draw_background(display_t *disp)
 {
-    ClearBackground(RESET_COLOR);
+    ClearBackground(disp->palette.reset);
 
     for (uint16_t x = 0; x < disp->cols; x++)
     {
         for (uint16_t y = 0; y < disp->rows; y++)
         {
-            Color color = RESET_COLOR;
+            Color color = disp->palette.reset;
             if (x % 2 == 0)
             {
                 if (y % 2 == 0)
                 {
-                    color = BACKGROUND_COLOR;
+                    color = disp->palette.background;
                 }
                 else
                 {
-                    color = BACKGROUND_ALT_COLOR;
+                    color = disp->palette.background_alt;
                 }
             }
             else
             {
                 if (y % 2 == 0)
                 {
-                    color = BACKGROUND_ALT_COLOR;
+                    color = disp->palette.background_alt;
                 }
                 else
                 {
-                    color = BACKGROUND_COLOR;
+                    color = disp->palette.background;
                 }
             }
 
@@ -132,14 +137,14 @@ void display_draw_grid(display_t *disp)
     for (uint16_t x = 0; x < disp->cols; x++)
     {
         uint16_t w = x * disp->pixel_width;
-        DrawLine(w, 0, w, SCREEN_HEIGHT, GRID_COLOR);
+        DrawLine(w, 0, w, disp->height, disp->palette.grid);
     }
 
     // Draw horizontal lines
     for (uint16_t y = 0; y < disp->rows; y++)
     {
         uint16_t h = y * disp->pixel_height;
-        DrawLine(0, h, SCREEN_WIDTH, h, GRID_COLOR);
+        DrawLine(0, h, disp->width, h, disp->palette.grid);
     }
 }
 
