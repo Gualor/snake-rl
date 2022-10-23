@@ -9,13 +9,13 @@
 
 /* Definitions ---------------------------------------------------------------*/
 
-#define UP \
+#define MOVE_UP \
     (game_dir_t) { 0, -1 }
-#define DOWN \
+#define MOVE_DOWN \
     (game_dir_t) { 0, 1 }
-#define LEFT \
+#define MOVE_LEFT \
     (game_dir_t) { -1, 0 }
-#define RIGHT \
+#define MOVE_RIGHT \
     (game_dir_t) { 1, 0 }
 
 /* Public typedefs -----------------------------------------------------------*/
@@ -34,10 +34,10 @@ typedef struct
 
 typedef enum
 {
-    EMPTY_CELL,
-    SNAKE_HEAD,
-    SNAKE_BODY,
-    FOOD
+    OBJ_EMPTY_CELL,
+    OBJ_SNAKE_HEAD,
+    OBJ_SNAKE_BODY,
+    OBJ_FOOD
 } game_obj_t;
 
 typedef struct
@@ -49,9 +49,7 @@ typedef struct
 
 typedef struct snake
 {
-    const uint16_t id;
-    const uint16_t cols;
-    const uint16_t rows;
+    bool is_dead;
     uint16_t length;
     game_dir_t dir;
     game_pos_t *pos;
@@ -59,31 +57,32 @@ typedef struct snake
 
 typedef struct food
 {
-    const uint16_t cols;
-    const uint16_t rows;
     uint16_t num;
     game_pos_t *pos;
 } food_t;
 
-/* Public functions ----------------------------------------------------------*/
+/* Public typedefs -----------------------------------------------------------*/
 
-game_mat_t *game_mat_init(uint16_t cols, uint16_t rows);
-void game_mat_deinit(game_mat_t *gmat);
-void game_mat_update(game_mat_t *gmat, snake_t *snake, food_t *food);
-void game_mat_reset(game_mat_t *gmat);
+// Game matrix functions
+game_mat_t *game_matrix_init(const uint16_t cols, const uint16_t rows);
+void game_matrix_deinit(game_mat_t *matrix);
+void game_matrix_reset(game_mat_t *matrix);
+void game_matrix_update(game_mat_t *matrix, snake_t *snakes[], uint16_t snake_num, food_t *food);
 
-snake_t *snake_init(uint16_t id, uint16_t length, uint16_t cols, uint16_t rows);
+// Single snake functions
+snake_t *snake_init(game_pos_t head_pos, game_dir_t init_dir, uint16_t init_len, game_mat_t *matrix);
 void snake_deinit(snake_t *snake);
 void snake_change_dir(snake_t *snake, game_dir_t dir);
-void snake_move(snake_t *snake);
+void snake_move(snake_t *snake, game_mat_t *matrix);
 void snake_grow(snake_t *snake);
-void snake_eat(snake_t *snake, food_t *food);
-bool snake_is_dead(snake_t *snake);
+bool snake_is_dead(uint16_t snake_idx, snake_t *snakes[], uint16_t snake_num);
 
-food_t *food_init(uint16_t num, uint16_t cols, uint16_t rows);
+// Food functions
+food_t *food_init(void);
 void food_deinit(food_t *food);
-void food_add_apple(food_t *food, game_pos_t pos);
-void food_add_apple_random(food_t *food);
+void food_add_apple(food_t *food, game_mat_t *matrix);
+void food_add_apple_pos(food_t *food, game_pos_t pos);
+void food_add_apple_random(food_t *food, game_mat_t *matrix);
 void food_delete_apple(food_t *food, game_pos_t pos);
 
 #endif /* _SNAKE_H_ */

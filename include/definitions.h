@@ -6,13 +6,17 @@
 /* Definitions ---------------------------------------------------------------*/
 
 // Display settings
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 450
-#define FPS 10
+#define SCREEN_WIDTH 1600
+#define SCREEN_HEIGHT 900
+#define FPS 20
 
 // Game matrix settings
-#define MATRIX_COLS 32
-#define MATRIX_ROWS 18
+#define MATRIX_COLS 64
+#define MATRIX_ROWS 36
+
+// Snake settings
+#define SNAKE_NUM 5
+#define SNAKE_LEN 5
 
 // Food settings
 #define APPLE_NUM 1

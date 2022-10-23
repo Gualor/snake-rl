@@ -57,20 +57,20 @@ void display_draw_objects(display_t *disp, game_mat_t *gmat)
         for (uint16_t y = 0; y < disp->rows; y++)
         {
             game_obj_t obj = gmat->state[x][y];
-            if (gmat->state[x][y] != EMPTY_CELL)
+            if (gmat->state[x][y] != OBJ_EMPTY_CELL)
             {
                 Color color = disp->palette.reset;
                 switch (obj)
                 {
-                case SNAKE_HEAD:
+                case OBJ_SNAKE_HEAD:
                     color = disp->palette.snake_head;
                     break;
 
-                case SNAKE_BODY:
+                case OBJ_SNAKE_BODY:
                     color = disp->palette.snake_body;
                     break;
 
-                case FOOD:
+                case OBJ_FOOD:
                     color = disp->palette.food;
                     break;
 
