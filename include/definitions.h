@@ -6,13 +6,13 @@
 /* Definitions ---------------------------------------------------------------*/
 
 // Display settings
-#define SCREEN_WIDTH 1600
-#define SCREEN_HEIGHT 900
-#define FPS 20
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 450
+#define FPS 10
 
 // Game matrix settings
-#define MATRIX_COLS 64
-#define MATRIX_ROWS 36
+#define MATRIX_COLS 32
+#define MATRIX_ROWS 18
 
 // Snake settings
 #define SNAKE_NUM 5
@@ -34,7 +34,7 @@
     (Color) { 0x03, 0xda, 0x59, 0xff }
 #define SNAKE_BODY_COLOR \
     (Color) { 0x03, 0xda, 0x59, 0xff }
-#define FOOD_COLOR \
+#define APPLE_COLOR \
     (Color) { 0xda, 0x03, 0x18, 0xff }
 
 // Game palette
@@ -47,7 +47,7 @@
         .grid = GRID_COLOR,                     \
         .snake_head = SNAKE_HEAD_COLOR,         \
         .snake_body = SNAKE_BODY_COLOR,         \
-        .food = FOOD_COLOR                      \
+        .apple = APPLE_COLOR                    \
     }
 
 #endif /* _DEFINITIONS_H_ */

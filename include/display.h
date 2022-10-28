@@ -19,7 +19,7 @@ typedef struct
     const Color grid;
     const Color snake_head;
     const Color snake_body;
-    const Color food;
+    const Color apple;
 } color_pal_t;
 
 typedef struct
@@ -40,9 +40,9 @@ display_t *display_init(uint16_t fps, uint16_t width, uint16_t height,
                         uint16_t cols, uint16_t rows, color_pal_t palette);
 void display_deinit(display_t *disp);
 bool display_exit(void);
-void display_draw(display_t *disp, game_mat_t *gmat);
+void display_draw(display_t *disp, board_t *board);
 void display_draw_background(display_t *disp);
-void display_draw_objects(display_t *disp, game_mat_t *gmat);
+void display_draw_objects(display_t *disp, board_t *board);
 void display_draw_grid(display_t *disp);
 
 #endif /* _DRAW_H_ */

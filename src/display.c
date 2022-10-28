@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "display.h"
+#include "stdio.h"
 
 /* Public functions ----------------------------------------------------------*/
 
@@ -39,25 +40,25 @@ bool display_exit(void)
     return WindowShouldClose();
 }
 
-void display_draw(display_t *disp, game_mat_t *gmat)
+void display_draw(display_t *disp, board_t *board)
 {
     BeginDrawing();
     // Start drawing
     display_draw_background(disp);
-    display_draw_objects(disp, gmat);
+    display_draw_objects(disp, board);
     display_draw_grid(disp);
     // Stop drawing
     EndDrawing();
 }
 
-void display_draw_objects(display_t *disp, game_mat_t *gmat)
+void display_draw_objects(display_t *disp, board_t *board)
 {
     for (uint16_t x = 0; x < disp->cols; x++)
     {
         for (uint16_t y = 0; y < disp->rows; y++)
         {
-            game_obj_t obj = gmat->state[x][y];
-            if (gmat->state[x][y] != OBJ_EMPTY_CELL)
+            game_obj_t obj = board->matrix[x][y];
+            if (obj != OBJ_EMPTY_CELL)
             {
                 Color color = disp->palette.reset;
                 switch (obj)
@@ -70,8 +71,8 @@ void display_draw_objects(display_t *disp, game_mat_t *gmat)
                     color = disp->palette.snake_body;
                     break;
 
-                case OBJ_FOOD:
-                    color = disp->palette.food;
+                case OBJ_APPLE:
+                    color = disp->palette.apple;
                     break;
 
                 default:

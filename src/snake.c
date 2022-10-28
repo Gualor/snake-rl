@@ -1,4 +1,4 @@
-/* Include libraries ---------------------------------------------------------*/
+/* Includes ----------------------------------------------------------------- */
 
 #include <stdlib.h>
 #include <string.h>
@@ -6,245 +6,225 @@
 #include <time.h>
 #include "snake.h"
 
-/* Definitions ---------------------------------------------------------------*/
+/* Definitions -------------------------------------------------------------- */
 
 #define SNAKE_MAX_LENGTH 100
-#define FOOD_MAX_NUM 100
+#define SNAKE_INIT_LENGTH 5
+#define APPLE_MAX_NUM 100
 
-/* Game matrix functions -----------------------------------------------------*/
+/* Game board functions ---------------------------------------------------- */
 
-game_mat_t *game_matrix_init(const uint16_t cols, const uint16_t rows)
+board_t *game_board_init(game_conf_t *conf)
 {
-    game_obj_t **state = calloc(cols, sizeof(game_obj_t *));
-    for (uint16_t x = 0; x < cols; x++)
+    // Create empty game matrix
+    game_obj_t **matrix = calloc(conf->cols, sizeof(game_obj_t *));
+    for (uint16_t x = 0; x < conf->cols; x++)
     {
-        game_obj_t *col = calloc(rows, sizeof(game_obj_t));
-        state[x] = col;
+        game_obj_t *col = calloc(conf->rows, sizeof(game_obj_t));
+        matrix[x] = col;
     }
 
-    game_mat_t matrix = {
-        .cols = cols,
-        .rows = rows,
-        .state = state};
+    // Create empty apple array
+    game_pos_t *apple_pos = calloc(APPLE_MAX_NUM, sizeof(game_pos_t));
 
-    game_mat_t *matrix_ptr = malloc(sizeof(game_mat_t));
-    memcpy(matrix_ptr, &matrix, sizeof(game_mat_t));
+    // Create game board
+    board_t *board = malloc(sizeof(board_t));
+    board->conf = conf;
+    board->matrix = matrix;
+    board->apple_pos = apple_pos;
+    board->apple_num = 0;
 
-    return matrix_ptr;
+    return board;
 }
 
-void game_matrix_deinit(game_mat_t *matrix)
+void game_board_deinit(board_t *board)
 {
-    for (uint16_t x = 0; x < matrix->cols; x++)
+    for (uint16_t x = 0; x < board->conf->cols; x++)
     {
-        free(matrix->state[x]);
+        free(board->matrix[x]);
     }
-    free(matrix->state);
+    free(board->matrix);
+    free(board->apple_pos);
+    free(board);
 }
 
-void game_matrix_update(game_mat_t *matrix, snake_t *snakes[],
-                        uint16_t snake_num, food_t *food)
+void game_board_update(board_t *board, snake_t *snake)
 {
-    // Reset matrix
-    game_matrix_reset(matrix);
+    game_board_reset(board);
 
-    for (uint16_t i = 0; i < snake_num; i++)
+    // Update apple positions
+    for (uint16_t i = 0; i < board->apple_num; i++)
     {
-        // Update snake position on state
-        snake_t *snake = snakes[i];
+        board->matrix[board->apple_pos[i].x][board->apple_pos[i].y] = OBJ_APPLE;
+    }
 
-        matrix->state[snake->pos[0].x][snake->pos[0].y] = OBJ_SNAKE_HEAD;
-        for (uint16_t i = 1; i < snake->length; i++)
+    // Update snake position
+    board->matrix[snake->body[0].x][snake->body[0].y] = OBJ_SNAKE_HEAD;
+    for (uint16_t i = 1; i < snake->length; i++)
+    {
+        board->matrix[snake->body[i].x][snake->body[i].y] = OBJ_SNAKE_BODY;
+    }
+}
+
+void game_board_reset(board_t *board)
+{
+    for (uint16_t x = 0; x < board->conf->cols; x++)
+    {
+        for (uint16_t y = 0; y < board->conf->rows; y++)
         {
-            matrix->state[snake->pos[i].x][snake->pos[i].y] = OBJ_SNAKE_BODY;
+            board->matrix[x][y] = OBJ_EMPTY_CELL;
+        }
+    }
+}
+
+bool game_board_is_apple(board_t *board, game_pos_t pos)
+{
+    return (board->matrix[pos.x][pos.y] == OBJ_APPLE);
+}
+
+void game_board_add_apple(board_t *board)
+{
+    uint16_t cols = board->conf->cols;
+    uint16_t rows = board->conf->rows;
+
+    // Get array of free cells
+    game_pos_t *empty_pos = malloc(sizeof(game_pos_t) * cols * rows);
+    uint16_t empty_num = 0;
+    for (uint16_t i = 0; i < cols; i++)
+    {
+        for (uint16_t j = 0; j < rows; j++)
+        {
+            if (board->matrix[i][j] == OBJ_EMPTY_CELL)
+            {
+                empty_pos[empty_num] = (game_pos_t){i, j};
+                empty_num++;
+            }
         }
     }
 
-    // Update food position on state
-    for (uint16_t i = 0; i < food->num; i++)
+    // Get random empty position
+    game_pos_t new_pos = empty_pos[rand() % empty_num];
+    free(empty_pos);
+
+    game_board_add_apple_pos(board, new_pos);
+}
+
+void game_board_add_apple_pos(board_t *board, game_pos_t pos)
+{
+    if (board->apple_num < APPLE_MAX_NUM)
     {
-        matrix->state[food->pos[i].x][food->pos[i].y] = OBJ_FOOD;
+        board->apple_pos[board->apple_num] = pos;
+        board->apple_num++;
     }
 }
 
-void game_matrix_reset(game_mat_t *matrix)
+void game_board_del_apple(board_t *board, game_pos_t pos)
 {
-    for (uint16_t x = 0; x < matrix->cols; x++)
+    if (board->apple_num < 1)
+        return;
+
+    // Find index of item to delete
+    uint16_t del_idx = 0;
+    bool del_flag = false;
+    for (uint16_t i = 0; i < board->apple_num; i++)
     {
-        for (uint16_t y = 0; y < matrix->rows; y++)
+        if ((board->apple_pos[i].x == pos.x) &&
+            (board->apple_pos[i].y == pos.y))
         {
-            matrix->state[x][y] = OBJ_EMPTY_CELL;
+            del_idx = i;
+            del_flag = true;
         }
     }
-}
+    if (del_flag == false)
+        return;
 
-bool game_matrix_is_eatable(game_mat_t *matrix, game_pos_t pos)
-{
-    return (matrix->state[pos.x][pos.y] == OBJ_FOOD);
-}
-
-/* Snake functions -----------------------------------------------------------*/
-
-snake_t *snake_init(game_pos_t head_pos, game_dir_t init_dir, uint16_t init_len,
-                    game_mat_t *matrix)
-{
-    game_pos_t *pos = calloc(SNAKE_MAX_LENGTH, sizeof(game_pos_t));
-    for (uint16_t i = 0; i < init_len; i++)
+    // Remove item from list
+    for (uint16_t i = del_idx; i < board->apple_num; i++)
     {
-        pos[i].x = head_pos.x % matrix->cols;
-        pos[i].y = head_pos.y;
+        board->apple_pos[i] = board->apple_pos[i + 1];
+    }
+    board->apple_pos[board->apple_num - 1] = (game_pos_t){-1, -1};
+    board->apple_num--;
+}
+
+/* Snake functions ---------------------------------------------------------- */
+
+snake_t *snake_init(game_conf_t *conf)
+{
+    // Create snake body array
+    game_pos_t *body = calloc(SNAKE_MAX_LENGTH, sizeof(game_pos_t));
+    game_pos_t head_pos = {conf->cols / 2, conf->rows / 2};
+    for (uint16_t i = 0; i < SNAKE_INIT_LENGTH; i++)
+    {
+        body[i].x = (head_pos.x + i) % conf->cols;
+        body[i].y = head_pos.y;
     }
 
-    snake_t snake = {
-        .dir = init_dir,
-        .pos = pos,
-        .is_dead = false,
-        .length = init_len,
-    };
+    // Create snake
+    snake_t *snake = malloc(sizeof(snake_t));
+    snake->conf = conf;
+    snake->dir = (game_dir_t){-1, 0};
+    snake->is_alive = true;
+    snake->length = SNAKE_INIT_LENGTH;
+    snake->body = body;
 
-    snake_t *snake_ptr = malloc(sizeof(snake_t));
-    memcpy(snake_ptr, &snake, sizeof(snake_t));
-
-    return snake_ptr;
+    return snake;
 }
 
 void snake_deinit(snake_t *snake)
 {
-    free(snake->pos);
+    free(snake->body);
     free(snake);
 }
 
-void snake_move(snake_t *snake, game_mat_t *matrix)
-{
-    game_pos_t head = {
-        .x = (matrix->cols + snake->pos[0].x + snake->dir.x) %
-             matrix->cols,
-        .y = (matrix->rows + snake->pos[0].y + snake->dir.y) %
-             matrix->rows};
-
-    for (uint16_t i = snake->length - 1; i > 0; i--)
-    {
-        snake->pos[i] = snake->pos[i - 1];
-    }
-
-    snake->pos[0] = head;
-}
-
-void snake_change_dir(snake_t *snake, game_dir_t dir)
+void snake_move(snake_t *snake, game_dir_t dir)
 {
     if ((snake->dir.x != 0) && (dir.x != 0))
         return;
     if ((snake->dir.y != 0) && (dir.y != 0))
         return;
     snake->dir = dir;
+
+    snake_update(snake);
+}
+
+void snake_update(snake_t *snake)
+{
+    uint16_t cols = snake->conf->cols;
+    uint16_t rows = snake->conf->rows;
+
+    game_pos_t head = {
+        .x = (cols + snake->body[0].x + snake->dir.x) % cols,
+        .y = (rows + snake->body[0].y + snake->dir.y) % rows};
+
+    for (uint16_t i = snake->length - 1; i > 0; i--)
+    {
+        snake->body[i] = snake->body[i - 1];
+    }
+
+    snake->body[0] = head;
 }
 
 void snake_grow(snake_t *snake)
 {
-    snake->pos[snake->length] = snake->pos[snake->length - 1];
+    snake->body[snake->length] = snake->body[snake->length - 1];
     snake->length++;
 }
 
-bool snake_is_dead(uint16_t snake_idx, snake_t *snakes[], uint16_t snake_num)
+bool snake_is_alive(snake_t *snake)
 {
-    game_pos_t head = snakes[snake_idx]->pos[0];
-    for (uint16_t i = 0; i < snake_num; i++)
+    game_pos_t head = snake->body[0];
+
+    for (uint16_t i = 1; i < snake->length; i++)
     {
-        for (uint16_t j = 0; j < snakes[i]->length; j++)
+        game_pos_t body_i = snake->body[i];
+        if ((head.x == body_i.x) && (head.y == body_i.y))
         {
-            if (!(i == snake_idx) || !(j == 0))
-            {
-                game_pos_t body_ij = snakes[i]->pos[j];
-                if ((head.x == body_ij.x) && (head.y == body_ij.y))
-                {
-                    snakes[snake_idx]->is_dead = true;
-                    return true;
-                }
-            }
+            snake->is_alive = false;
         }
     }
 
-    return false;
+    return snake->is_alive;
 }
 
-/* Food functions ------------------------------------------------------------*/
-
-food_t *food_init(void)
-{
-    srand((uint32_t)time(NULL));
-
-    game_pos_t *pos = calloc(FOOD_MAX_NUM, sizeof(game_pos_t));
-
-    food_t food = {
-        .num = 0,
-        .pos = pos};
-
-    food_t *food_ptr = malloc(sizeof(food_t));
-    memcpy(food_ptr, &food, sizeof(food_t));
-
-    return food_ptr;
-}
-
-void food_deinit(food_t *food)
-{
-    free(food->pos);
-    free(food);
-}
-
-void food_add_apple(food_t *food, game_mat_t *matrix)
-{
-    food_add_apple_random(food, matrix);
-}
-
-void food_add_apple_random(food_t *food, game_mat_t *matrix)
-{
-    uint16_t x, y;
-
-    while (true)
-    {
-        x = rand() % matrix->cols;
-        y = rand() % matrix->rows;
-
-        if (matrix->state[x][y] == OBJ_EMPTY_CELL)
-            break;
-    }
-
-    food_add_apple_pos(food, (game_pos_t){x, y});
-}
-
-void food_add_apple_pos(food_t *food, game_pos_t pos)
-{
-    if (food->num < FOOD_MAX_NUM)
-    {
-        food->pos[food->num] = pos;
-        food->num++;
-    }
-}
-
-void food_delete_apple(food_t *food, game_pos_t pos)
-{
-    if (food->num < 1)
-        return;
-
-    // Find index of item to delete
-    uint16_t del_idx = -1;
-    for (uint16_t i = 0; i < food->num; i++)
-    {
-        if ((food->pos[i].x == pos.x) && (food->pos[i].y == pos.y))
-        {
-            del_idx = i;
-        }
-    }
-    if (del_idx == -1)
-        return;
-
-    // Remove item from list
-    for (uint16_t i = del_idx; i < food->num; i++)
-    {
-        food->pos[i] = food->pos[i + 1];
-    }
-    food->pos[food->num - 1] = (game_pos_t){-1, -1};
-    food->num--;
-}
-
-/*----------------------------------------------------------------------------*/
+/* -------------------------------------------------------------------------- */
