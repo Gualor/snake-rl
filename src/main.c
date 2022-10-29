@@ -11,15 +11,25 @@ int main(void)
 {
     /* Game initialization -------------------------------------------------- */
 
-    game_conf_t conf = {.cols = MATRIX_COLS,
-                        .rows = MATRIX_ROWS};
+    board_conf_t board_conf = {.cols = MATRIX_COLS,
+                               .rows = MATRIX_ROWS,
+                               .apple_num = APPLE_NUM};
 
-    board_t *board = game_board_init(&conf);
+    snake_conf_t snake_conf = {.init_length = SNAKE_INIT_LENGTH,
+                               .max_length = SNAKE_MAX_LENGTH,
+                               .cols = MATRIX_COLS,
+                               .rows = MATRIX_ROWS};
 
-    display_t *display = display_init(FPS, SCREEN_WIDTH, SCREEN_HEIGHT,
-                                      MATRIX_COLS, MATRIX_ROWS, COLOR_PALETTE);
+    display_conf_t display_conf = {.fps = FPS,
+                                   .width = SCREEN_WIDTH,
+                                   .height = SCREEN_HEIGHT,
+                                   .cols = MATRIX_COLS,
+                                   .rows = MATRIX_ROWS,
+                                   .palette = COLOR_PALETTE};
 
-    snake_t *snake = snake_init(&conf);
+    board_t *board = game_board_init(&board_conf);
+    snake_t *snake = snake_init(&snake_conf);
+    display_t *display = display_init(&display_conf);
 
     /* Main game loop ------------------------------------------------------- */
 
@@ -42,24 +52,25 @@ int main(void)
         /* Game logic ------------------------------------------------------- */
 
         // If apple has been eaten, add new one
-        if (board->apple_num < APPLE_NUM)
+        if (game_board_check_apple_num(board))
         {
             game_board_add_apple(board);
         }
 
         // If snake head is over an apple, eat
-        game_pos_t head = snake->body[0];
-        if (board->matrix[head.x][head.y] == OBJ_APPLE)
+        game_pos_t head = snake_get_head(snake);
+        if (game_board_is_apple(board, head))
         {
             snake_grow(snake);
             game_board_del_apple(board, head);
         }
 
-        // Update game state
+        // Update board with new snake position
         game_board_update(board, snake);
 
         /* Draw ------------------------------------------------------------- */
 
+        // Draw game display
         display_draw(display, board);
     }
 

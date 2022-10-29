@@ -1,37 +1,49 @@
-/* Include libraries ---------------------------------------------------------*/
+/* Includes ----------------------------------------------------------------- */
 
 #include <stdlib.h>
 #include <string.h>
 #include "display.h"
 #include "stdio.h"
 
-/* Public functions ----------------------------------------------------------*/
+/* Private typedefs --------------------------------------------------------- */
 
-display_t *display_init(uint16_t fps, uint16_t width, uint16_t height,
-                        uint16_t cols, uint16_t rows, color_pal_t palette)
+typedef struct
 {
-    InitWindow(width, height, "Snake RL");
-    SetTargetFPS(fps);
+    uint16_t fps;
+    uint16_t width;
+    uint16_t height;
+    uint16_t cols;
+    uint16_t rows;
+    uint16_t pixel_width;
+    uint16_t pixel_height;
+    color_pal_t palette;
+} display_pvt_t;
 
-    display_t display = {
-        .fps = fps,
-        .width = width,
-        .height = height,
-        .cols = cols,
-        .rows = rows,
-        .pixel_width = width / cols,
-        .pixel_height = height / rows,
-        .palette = palette};
+/* Public functions --------------------------------------------------------- */
 
-    display_t *display_ptr = malloc(sizeof(display_t));
-    memcpy(display_ptr, &display, sizeof(display_t));
+display_t *display_init(display_conf_t *conf)
+{
+    // Initialize display
+    InitWindow(conf->width, conf->height, "Snake RL");
+    SetTargetFPS(conf->fps);
 
-    return display_ptr;
+    // Create private display data structure
+    display_pvt_t *display = malloc(sizeof(display_pvt_t));
+    display->fps = conf->fps;
+    display->width = conf->width;
+    display->height = conf->height;
+    display->cols = conf->cols;
+    display->rows = conf->rows;
+    display->palette = conf->palette;
+    display->pixel_width = conf->width / conf->cols;
+    display->pixel_height = conf->height / conf->rows;
+
+    return (display_t *)display;
 }
 
-void display_deinit(display_t *disp)
+void display_deinit(display_t *display)
 {
-    free(disp);
+    free(display);
     CloseWindow();
 }
 
@@ -40,39 +52,42 @@ bool display_exit(void)
     return WindowShouldClose();
 }
 
-void display_draw(display_t *disp, board_t *board)
+void display_draw(display_t *display, board_t *board)
 {
     BeginDrawing();
     // Start drawing
-    display_draw_background(disp);
-    display_draw_objects(disp, board);
-    display_draw_grid(disp);
+    display_draw_background(display);
+    display_draw_objects(display, board);
+    display_draw_grid(display);
     // Stop drawing
     EndDrawing();
 }
 
-void display_draw_objects(display_t *disp, board_t *board)
+void display_draw_objects(display_t *display, board_t *board)
 {
-    for (uint16_t x = 0; x < disp->cols; x++)
+    display_pvt_t *_display = (display_pvt_t *)display;
+
+    game_obj_t **matrix = game_board_get_matrix(board);
+    for (uint16_t x = 0; x < _display->cols; x++)
     {
-        for (uint16_t y = 0; y < disp->rows; y++)
+        for (uint16_t y = 0; y < _display->rows; y++)
         {
-            game_obj_t obj = board->matrix[x][y];
+            game_obj_t obj = matrix[x][y];
             if (obj != OBJ_EMPTY_CELL)
             {
-                Color color = disp->palette.reset;
+                Color color = _display->palette.reset;
                 switch (obj)
                 {
                 case OBJ_SNAKE_HEAD:
-                    color = disp->palette.snake_head;
+                    color = _display->palette.snake_head;
                     break;
 
                 case OBJ_SNAKE_BODY:
-                    color = disp->palette.snake_body;
+                    color = _display->palette.snake_body;
                     break;
 
                 case OBJ_APPLE:
-                    color = disp->palette.apple;
+                    color = _display->palette.apple;
                     break;
 
                 default:
@@ -80,73 +95,68 @@ void display_draw_objects(display_t *disp, board_t *board)
                 }
 
                 DrawRectangle(
-                    x * disp->pixel_width,
-                    y * disp->pixel_height,
-                    disp->pixel_width,
-                    disp->pixel_height,
+                    x * _display->pixel_width,
+                    y * _display->pixel_height,
+                    _display->pixel_width,
+                    _display->pixel_height,
                     color);
             }
         }
     }
 }
 
-void display_draw_background(display_t *disp)
+void display_draw_background(display_t *display)
 {
-    ClearBackground(disp->palette.reset);
+    display_pvt_t *_display = (display_pvt_t *)display;
+    ClearBackground(_display->palette.reset);
 
-    for (uint16_t x = 0; x < disp->cols; x++)
+    for (uint16_t x = 0; x < _display->cols; x++)
     {
-        for (uint16_t y = 0; y < disp->rows; y++)
+        for (uint16_t y = 0; y < _display->rows; y++)
         {
-            Color color = disp->palette.reset;
+            Color color = _display->palette.reset;
             if (x % 2 == 0)
             {
                 if (y % 2 == 0)
-                {
-                    color = disp->palette.background;
-                }
+                    color = _display->palette.background;
                 else
-                {
-                    color = disp->palette.background_alt;
-                }
+                    color = _display->palette.background_alt;
             }
             else
             {
                 if (y % 2 == 0)
-                {
-                    color = disp->palette.background_alt;
-                }
+                    color = _display->palette.background_alt;
                 else
-                {
-                    color = disp->palette.background;
-                }
+                    color = _display->palette.background;
             }
 
             DrawRectangle(
-                x * disp->pixel_width,
-                y * disp->pixel_height,
-                disp->pixel_width,
-                disp->pixel_height,
+                x * _display->pixel_width,
+                y * _display->pixel_height,
+                _display->pixel_width,
+                _display->pixel_height,
                 color);
         }
     }
 }
 
-void display_draw_grid(display_t *disp)
+void display_draw_grid(display_t *display)
 {
+    display_pvt_t *_display = (display_pvt_t *)display;
+
     // Draw vertical lines
-    for (uint16_t x = 0; x < disp->cols; x++)
+    for (uint16_t x = 0; x < _display->cols; x++)
     {
-        uint16_t w = x * disp->pixel_width;
-        DrawLine(w, 0, w, disp->height, disp->palette.grid);
+        uint16_t w = x * _display->pixel_width;
+        DrawLine(w, 0, w, _display->height, _display->palette.grid);
     }
 
     // Draw horizontal lines
-    for (uint16_t y = 0; y < disp->rows; y++)
+    for (uint16_t y = 0; y < _display->rows; y++)
     {
-        uint16_t h = y * disp->pixel_height;
-        DrawLine(0, h, disp->width, h, disp->palette.grid);
+        uint16_t h = y * _display->pixel_height;
+        DrawLine(0, h, _display->width, h, _display->palette.grid);
     }
 }
 
-/*----------------------------------------------------------------------------*/
+/* -------------------------------------------------------------------------- */

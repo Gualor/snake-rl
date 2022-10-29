@@ -1,25 +1,23 @@
-/* Header guard --------------------------------------------------------------*/
+/* Header guard ------------------------------------------------------------- */
 
 #ifndef _DEFINITIONS_H_
 #define _DEFINITIONS_H_
 
-/* Definitions ---------------------------------------------------------------*/
+/* Definitions -------------------------------------------------------------- */
 
 // Display settings
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 450
 #define FPS 10
 
-// Game matrix settings
+// Game board settings
 #define MATRIX_COLS 32
 #define MATRIX_ROWS 18
+#define APPLE_NUM 1
 
 // Snake settings
-#define SNAKE_NUM 5
-#define SNAKE_LEN 5
-
-// Food settings
-#define APPLE_NUM 1
+#define SNAKE_INIT_LENGTH 5
+#define SNAKE_MAX_LENGTH (MATRIX_ROWS * MATRIX_COLS)
 
 // Game colors
 #define RESET_COLOR \
@@ -52,4 +50,4 @@
 
 #endif /* _DEFINITIONS_H_ */
 
-/*----------------------------------------------------------------------------*/
+/* -------------------------------------------------------------------------- */
