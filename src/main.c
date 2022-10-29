@@ -4,6 +4,7 @@
 #include "definitions.h"
 #include "display.h"
 #include "snake.h"
+#include "qlearning.h"
 
 /* Main function ------------------------------------------------------------ */
 
@@ -67,6 +68,8 @@ int main(void)
 
         // Update board with new snake position
         game_board_update(board, snake);
+
+        qlearn_get_state(board, snake);
 
         /* Draw ------------------------------------------------------------- */
 

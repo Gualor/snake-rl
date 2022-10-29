@@ -6,6 +6,7 @@
 /* Includes ----------------------------------------------------------------- */
 
 #include <stdint.h>
+#include <stdbool.h>
 
 /* Definitions -------------------------------------------------------------- */
 
@@ -70,7 +71,12 @@ void game_board_add_apple_pos(board_t *board, game_pos_t pos);
 void game_board_del_apple(board_t *board, game_pos_t pos);
 bool game_board_is_apple(board_t *board, game_pos_t pos);
 bool game_board_check_apple_num(board_t *board);
+uint16_t **game_board_get_cols(board_t *board);
+uint16_t **game_board_get_rows(board_t *board);
+uint16_t game_board_get_apple_num(board_t *board);
 game_obj_t **game_board_get_matrix(board_t *board);
+game_pos_t *game_board_get_apple_pos(board_t *board);
+game_pos_t game_board_get_apple_near(board_t *board, snake_t *snake);
 
 // Snake functions
 snake_t *snake_init(snake_conf_t *conf);
@@ -81,6 +87,8 @@ void snake_update(snake_t *snake);
 void snake_grow(snake_t *snake);
 bool snake_is_alive(snake_t *snake);
 game_pos_t snake_get_head(snake_t *snake);
+game_pos_t *snake_get_body(snake_t *snake);
+uint16_t snake_get_length(snake_t *snake);
 
 #endif /* _SNAKE_H_ */
 

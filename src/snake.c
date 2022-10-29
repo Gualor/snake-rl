@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
+#include <math.h>
 #include <time.h>
 #include "snake.h"
 
@@ -28,7 +28,40 @@ typedef struct
     bool is_alive;
 } snake_pvt_t;
 
-/* Game board functions ---------------------------------------------------- */
+/* Private functions -------------------------------------------------------- */
+
+uint16_t compute_distance(game_pos_t pos1,
+                          game_pos_t pos2,
+                          uint16_t cols,
+                          uint16_t rows)
+{
+    uint16_t x_dist = abs(pos1.x - pos2.x);
+    uint16_t y_dist = abs(pos1.y - pos2.y);
+
+    // // Without wall bounds, we have 4 distances
+    // uint16_t dist[4];
+    // dist[0] = x_dist + y_dist;
+    // dist[1] = ((x_dist + 7) % x_dist) + y_dist;
+    // dist[2] = x_dist + ((y_dist + 7) % y_dist);
+    // dist[3] = ((x_dist + 7) % x_dist) + ((y_dist + 7) % y_dist);
+
+    // // Take the shortest path
+    // uint16_t min_val = dist[0];
+    // for (uint8_t i = 1; i < 4; i++)
+    // {
+    //     if (dist[i] < min_val)
+    //     {
+    //         min_val = dist[i];
+    //     }
+    // }
+
+    // return min_val;
+
+    /** TODO: debug pacman distance*/
+    return x_dist + y_dist;
+}
+
+/* Game board functions ----------------------------------------------------- */
 
 board_t *game_board_init(board_conf_t *conf)
 {
@@ -177,11 +210,18 @@ bool game_board_is_apple(board_t *board, game_pos_t pos)
     return (_board->matrix[pos.x][pos.y] == OBJ_APPLE);
 }
 
-game_obj_t **game_board_get_matrix(board_t *board)
+uint16_t **game_board_get_cols(board_t *board)
 {
     board_pvt_t *_board = (board_pvt_t *)board;
 
-    return (_board->matrix);
+    return _board->cols;
+}
+
+uint16_t **game_board_get_rows(board_t *board)
+{
+    board_pvt_t *_board = (board_pvt_t *)board;
+
+    return _board->rows;
 }
 
 bool game_board_check_apple_num(board_t *board)
@@ -189,6 +229,52 @@ bool game_board_check_apple_num(board_t *board)
     board_pvt_t *_board = (board_pvt_t *)board;
 
     return (_board->apple_num < _board->apple_max_num);
+}
+
+uint16_t game_board_get_apple_num(board_t *board)
+{
+    board_pvt_t *_board = (board_pvt_t *)board;
+
+    return _board->apple_num;
+}
+
+game_obj_t **game_board_get_matrix(board_t *board)
+{
+    board_pvt_t *_board = (board_pvt_t *)board;
+
+    return (_board->matrix);
+}
+
+game_pos_t *game_board_get_apple_pos(board_t *board)
+{
+    board_pvt_t *_board = (board_pvt_t *)board;
+
+    return _board->apple_pos;
+}
+
+game_pos_t game_board_get_apple_near(board_t *board, snake_t *snake)
+{
+    board_pvt_t *_board = (board_pvt_t *)board;
+    uint16_t cols = _board->cols;
+    uint16_t rows = _board->rows;
+
+    uint16_t min_dist = 0xffff;
+    uint16_t apple_idx = 0;
+
+    game_pos_t head = snake_get_head(snake);
+    for (uint16_t i = 0; i < _board->apple_num; i++)
+    {
+        game_pos_t apple = _board->apple_pos[i];
+        uint16_t dist = compute_distance(head, apple, cols, rows);
+
+        if (dist < min_dist)
+        {
+            min_dist = dist;
+            apple_idx = i;
+        }
+    }
+
+    return _board->apple_pos[apple_idx];
 }
 
 /* Snake functions ---------------------------------------------------------- */
@@ -290,6 +376,20 @@ game_pos_t snake_get_head(snake_t *snake)
     snake_pvt_t *_snake = (snake_pvt_t *)snake;
 
     return _snake->body[0];
+}
+
+game_pos_t *snake_get_body(snake_t *snake)
+{
+    snake_pvt_t *_snake = (snake_pvt_t *)snake;
+
+    return _snake->body;
+}
+
+uint16_t snake_get_length(snake_t *snake)
+{
+    snake_pvt_t *_snake = (snake_pvt_t *)snake;
+
+    return _snake->length;
 }
 
 /* -------------------------------------------------------------------------- */
