@@ -5,15 +5,17 @@
 
 /* Definitions -------------------------------------------------------------- */
 
-// Display settings
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 450
-#define FPS 10
-
 // Game board settings
 #define MATRIX_COLS 32
 #define MATRIX_ROWS 18
-#define APPLE_NUM 1
+#define APPLES_MAX_NUM 1
+
+// Display settings
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 450
+#define PIXEL_WIDTH (SCREEN_WIDTH / MATRIX_COLS)
+#define PIXEL_HEIGHT (SCREEN_HEIGHT / MATRIX_ROWS)
+#define FPS 1
 
 // Snake settings
 #define SNAKE_INIT_LENGTH 5
@@ -34,19 +36,6 @@
     (Color) { 0x03, 0xda, 0x59, 0xff }
 #define APPLE_COLOR \
     (Color) { 0xda, 0x03, 0x18, 0xff }
-
-// Game palette
-#define COLOR_PALETTE                           \
-    (color_pal_t)                               \
-    {                                           \
-        .reset = RESET_COLOR,                   \
-        .background = BACKGROUND_COLOR,         \
-        .background_alt = BACKGROUND_ALT_COLOR, \
-        .grid = GRID_COLOR,                     \
-        .snake_head = SNAKE_HEAD_COLOR,         \
-        .snake_body = SNAKE_BODY_COLOR,         \
-        .apple = APPLE_COLOR                    \
-    }
 
 #endif /* _DEFINITIONS_H_ */
 

@@ -10,14 +10,16 @@
 
 /* Definitions -------------------------------------------------------------- */
 
-#define MOVE_UP \
+#define SNAKE_UP \
     (game_dir_t) { 0, -1 }
-#define MOVE_DOWN \
+#define SNAKE_DOWN \
     (game_dir_t) { 0, 1 }
-#define MOVE_LEFT \
+#define SNAKE_LEFT \
     (game_dir_t) { -1, 0 }
-#define MOVE_RIGHT \
+#define SNAKE_RIGHT \
     (game_dir_t) { 1, 0 }
+#define SNAKE_IDLE \
+    (game_dir_t) { 0, 0 }
 
 /* Public typedefs ---------------------------------------------------------- */
 
@@ -56,8 +58,8 @@ typedef struct
     const uint16_t max_length;
 } snake_conf_t;
 
-typedef void board_t;
-typedef void snake_t;
+typedef struct board board_t;
+typedef struct snake snake_t;
 
 /* Public functions --------------------------------------------------------- */
 
@@ -71,24 +73,30 @@ void game_board_add_apple_pos(board_t *board, game_pos_t pos);
 void game_board_del_apple(board_t *board, game_pos_t pos);
 bool game_board_is_apple(board_t *board, game_pos_t pos);
 bool game_board_check_apple_num(board_t *board);
-uint16_t **game_board_get_cols(board_t *board);
-uint16_t **game_board_get_rows(board_t *board);
+uint16_t game_board_get_cols(board_t *board);
+uint16_t game_board_get_rows(board_t *board);
 uint16_t game_board_get_apple_num(board_t *board);
 game_obj_t **game_board_get_matrix(board_t *board);
 game_pos_t *game_board_get_apple_pos(board_t *board);
 game_pos_t game_board_get_apple_near(board_t *board, snake_t *snake);
+bool game_board_snake_can_eat(board_t *board, snake_t *snake);
 
 // Snake functions
 snake_t *snake_init(snake_conf_t *conf);
 void snake_deinit(snake_t *snake);
+void snake_respawn(snake_t *snake, snake_conf_t *conf);
 void snake_move(snake_t *snake, game_dir_t dir);
 void snake_change_dir(snake_t *snake, game_dir_t dir);
 void snake_update(snake_t *snake);
 void snake_grow(snake_t *snake);
 bool snake_is_alive(snake_t *snake);
 game_pos_t snake_get_head(snake_t *snake);
+game_dir_t snake_get_dir(snake_t *snake);
 game_pos_t *snake_get_body(snake_t *snake);
 uint16_t snake_get_length(snake_t *snake);
+
+// Utility functions
+uint16_t manhattan_distance(game_pos_t pos1, game_pos_t pos2);
 
 #endif /* _SNAKE_H_ */
 
