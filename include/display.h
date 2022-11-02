@@ -15,7 +15,7 @@
 void display_init(void);
 void display_deinit(void);
 bool display_exit(void);
-void display_update(game_obj_t **matrix);
+void display_update(game_t *game);
 
 #endif /* _DISPLAY_H_ */
 

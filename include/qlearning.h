@@ -19,7 +19,7 @@ typedef struct qlearn qlearn_t;
 typedef struct qtable_conf
 {
     const uint32_t n_states;
-    const uint16_t n_actions;
+    const uint8_t n_actions;
     const float alpha;
     const float gamma;
     const float epsilon;
@@ -35,7 +35,6 @@ typedef struct qlearn_conf
     reward_t (*get_reward)(void *);
     qtable_conf_t *params;
 } qlearn_conf_t;
-
 
 /* Public functions --------------------------------------------------------- */
 

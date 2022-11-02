@@ -15,7 +15,7 @@
 #define SCREEN_HEIGHT 450
 #define PIXEL_WIDTH (SCREEN_WIDTH / MATRIX_COLS)
 #define PIXEL_HEIGHT (SCREEN_HEIGHT / MATRIX_ROWS)
-#define FPS 1
+#define FPS 100
 
 // Snake settings
 #define SNAKE_INIT_LENGTH 5

@@ -17,8 +17,8 @@ typedef struct qlearn
     void (*apply_action)(void *, action_t);
     state_t (*get_state)(void *);
     reward_t (*get_reward)(void *);
-    uint16_t n_states;
-    uint16_t n_actions;
+    uint32_t n_states;
+    uint8_t n_actions;
     float alpha;
     float gamma;
     float epsilon;
@@ -28,13 +28,13 @@ typedef struct qlearn
 
 qlearn_t *qlearn_init(qlearn_conf_t *conf)
 {
-    float **table = calloc(conf->params->n_states + 1, sizeof(float *));
-    for (uint16_t i = 0; i < conf->params->n_states; i++)
+    qvalue_t **table = calloc(conf->params->n_states, sizeof(qvalue_t *));
+    for (uint32_t i = 0; i < conf->params->n_states; i++)
     {
-        table[i] = calloc(conf->params->n_actions, sizeof(float));
+        table[i] = calloc(conf->params->n_actions, sizeof(qvalue_t));
     }
 
-    qlearn_t *qlearn = malloc(sizeof(qlearn));
+    qlearn_t *qlearn = malloc(sizeof(qlearn_t));
     // Game instance
     qlearn->game = conf->game;
     // Game APIs
@@ -77,12 +77,27 @@ void qlearn_restart(qlearn_t *qlearn)
 
 bool qlearn_is_ended(qlearn_t *qlearn)
 {
+    qlearn->epsilon *= 0.999f;
     return qlearn->is_ended(qlearn->game);
 }
 
 state_t qlearn_get_state(qlearn_t *qlearn)
 {
-    return qlearn->get_state(qlearn->game);
+    state_t state = qlearn->get_state(qlearn->game);
+
+    printf("Epsilon: %f\tDistance: %d\tU: %c\tD: %c\tL: %c\tR: %c\tUL: %c\tUR: %c\tDL: %c\tDR: %c\n",
+           qlearn->epsilon,
+           (state >> 8),
+           (state & 0x1) ? 'X' : ' ',
+           (state & 0x2) ? 'X' : ' ',
+           (state & 0x4) ? 'X' : ' ',
+           (state & 0x8) ? 'X' : ' ',
+           (state & 0x10) ? 'X' : ' ',
+           (state & 0x20) ? 'X' : ' ',
+           (state & 0x40) ? 'X' : ' ',
+           (state & 0x80) ? 'X' : ' ');
+
+    return state;
 }
 
 reward_t qlearn_get_reward(qlearn_t *qlearn)
@@ -131,8 +146,7 @@ action_t qlearn_get_action(qlearn_t *qlearn, state_t S)
     return a;
 }
 
-void qlearn_update_qvalue(qlearn_t *qlearn, state_t S, action_t a, reward_t R,
-                          qvalue_t Q_max)
+void qlearn_update_qvalue(qlearn_t *qlearn, state_t S, action_t a, reward_t R, qvalue_t Q_max)
 {
     // Get old Q value for state S and action a
     qvalue_t Q = qlearn->table[S][a];

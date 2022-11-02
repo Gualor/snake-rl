@@ -19,7 +19,7 @@ int main(void)
 	qtable_conf_t qtable_conf = {.alpha = 0.1f,
 								 .gamma = 1.0f,
 								 .epsilon = 0.99f,
-								 .n_states = 65535,
+								 .n_states = 65536,
 								 .n_actions = 5};
 
 	qlearn_conf_t qlearn_conf = {.game = game,
@@ -36,12 +36,12 @@ int main(void)
 
 	while (!display_exit())
 	{
-		while (qlearn_is_ended(qlearn))
+		while (!qlearn_is_ended(qlearn))
 		{
 			/* Q-learning algorithm ----------------------------------------- */
 
 			/* 1. Get representation S of current state */
-			uint16_t S = qlearn_get_state(qlearn);
+			state_t S = qlearn_get_state(qlearn);
 
 			/* 2. Get action a associated with maximum Q value for S */
 			action_t a = qlearn_get_action(qlearn, S);
@@ -50,24 +50,24 @@ int main(void)
 			qlearn_apply_action(qlearn, a);
 
 			/* 4. Get reward R for taking action a in state S */
-			float reward = qlearn_get_reward(qlearn);
+			reward_t reward = qlearn_get_reward(qlearn);
 
 			/* 5. Get representation S' of new state */
 			uint16_t S_new = qlearn_get_state(qlearn);
 
 			/* 6. Get maximum possible future Q value */
-			float Q_max = qlearn_get_max_qvalue(qlearn, S_new);
+			qvalue_t Q_max = qlearn_get_max_qvalue(qlearn, S_new);
 
 			/* 7. Update Q value associated with state S and action a */
 			qlearn_update_qvalue(qlearn, S, a, reward, Q_max);
 
 			/* Draw --------------------------------------------------------- */
 
-			game_obj_t **matrix = game_get_matrix(game);
-			display_update(matrix);
+			display_update(game);
 		}
 
 		/* Reset ------------------------------------------------------------ */
+
 		qlearn_restart(qlearn);
 	}
 
