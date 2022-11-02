@@ -1,9 +1,15 @@
 /* Includes ----------------------------------------------------------------- */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "display.h"
-#include "stdio.h"
+
+/* Private prototypes ------------------------------------------------------- */
+
+void display_draw_objects(game_obj_t **matrix);
+void display_draw_background(void);
+void display_draw_grid(void);
 
 /* Public functions --------------------------------------------------------- */
 
@@ -23,7 +29,7 @@ bool display_exit(void)
     return WindowShouldClose();
 }
 
-void display_draw(game_obj_t **matrix)
+void display_update(game_obj_t **matrix)
 {
     BeginDrawing();
     // Start drawing
@@ -33,6 +39,8 @@ void display_draw(game_obj_t **matrix)
     // Stop drawing
     EndDrawing();
 }
+
+/* Private functions -------------------------------------------------------- */
 
 void display_draw_objects(game_obj_t **matrix)
 {

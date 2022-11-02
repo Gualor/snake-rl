@@ -32,11 +32,15 @@ typedef struct game game_t;
 
 /* Public functions --------------------------------------------------------- */
 
-game_t *game_init(void);
-void game_deinit(game_t *game);
-void game_restart(game_t *game);
-void game_apply_move(game_t *game, game_move_t move);
-bool game_is_ended(game_t *game);
+void *game_init(void);
+void game_deinit(void *game);
+void game_restart(void *game);
+void game_apply_move(void *game, uint8_t move_id);
+bool game_is_ended(void *game);
+uint16_t game_get_state(void *game);
+int16_t game_get_reward(void *game);
+void game_update_matrix(void *game);
+game_obj_t **game_get_matrix(void *game);
 
 #endif /* _GAME_H_ */
 

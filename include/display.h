@@ -1,13 +1,12 @@
-/* Header guard --------------------------------------------------------------*/
+/* Header guard ------------------------------------------------------------- */
 
-#ifndef _DRAW_H_
-#define _DRAW_H_
+#ifndef _DISPLAY_H_
+#define _DISPLAY_H_
 
 /* Includes ----------------------------------------------------------------- */
 
 #include <stdint.h>
 #include <raylib.h>
-// #include "snake.h"
 #include "definitions.h"
 #include "game.h"
 
@@ -16,11 +15,8 @@
 void display_init(void);
 void display_deinit(void);
 bool display_exit(void);
-void display_draw(game_obj_t **matrix);
-void display_draw_background(void);
-void display_draw_objects(game_obj_t **matrix);
-void display_draw_grid(void);
+void display_update(game_obj_t **matrix);
 
-#endif /* _DRAW_H_ */
+#endif /* _DISPLAY_H_ */
 
 /* -------------------------------------------------------------------------- */
