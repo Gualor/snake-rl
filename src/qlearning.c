@@ -77,7 +77,7 @@ void qlearn_restart(qlearn_t *qlearn)
 
 bool qlearn_is_ended(qlearn_t *qlearn)
 {
-    qlearn->epsilon *= 0.999f;
+    qlearn->epsilon *= 0.9999f;
     return qlearn->is_ended(qlearn->game);
 }
 

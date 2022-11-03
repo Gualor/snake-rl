@@ -365,14 +365,23 @@ void snake_grow(snake_t *snake)
 bool snake_is_alive(snake_t *snake)
 {
     game_pos_t head = snake->body[0];
+
+    // Check if snake head intersect body
     for (uint16_t i = 1; i < snake->length; i++)
     {
         game_pos_t body_i = snake->body[i];
         if ((head.x == body_i.x) && (head.y == body_i.y))
-        {
             return false;
-        }
     }
+
+    // Check if snake head is out of bounds
+    int16_t posx = (int16_t)head.x + snake->dir.x;
+    int16_t posy = (int16_t)head.y + snake->dir.y;
+    if ((posx < 0) || (posx >= MATRIX_COLS))
+        return false;
+
+    if ((posy < 0) || (posy >= MATRIX_ROWS))
+        return false;
 
     return true;
 }

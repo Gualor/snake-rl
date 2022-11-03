@@ -10,15 +10,15 @@
 
 int main(void)
 {
-	/* Game initialization -------------------------------------------------- */
-
 	display_init();
+
+	/* Game initialization -------------------------------------------------- */
 
 	void *game = game_init();
 
 	qtable_conf_t qtable_conf = {.alpha = 0.1f,
-								 .gamma = 1.0f,
-								 .epsilon = 0.99f,
+								 .gamma = 0.9f,
+								 .epsilon = 1.0f,
 								 .n_states = 65536,
 								 .n_actions = 5};
 
@@ -53,7 +53,7 @@ int main(void)
 			reward_t reward = qlearn_get_reward(qlearn);
 
 			/* 5. Get representation S' of new state */
-			uint16_t S_new = qlearn_get_state(qlearn);
+			qvalue_t S_new = qlearn_get_state(qlearn);
 
 			/* 6. Get maximum possible future Q value */
 			qvalue_t Q_max = qlearn_get_max_qvalue(qlearn, S_new);
@@ -75,6 +75,7 @@ int main(void)
 
 	game_deinit(game);
 	qlearn_deinit(qlearn);
+
 	display_deinit();
 
 	return 0;
