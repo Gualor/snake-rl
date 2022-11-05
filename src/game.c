@@ -5,6 +5,11 @@
 #include <time.h>
 #include "game.h"
 
+/* Definitions -------------------------------------------------------------- */
+
+#define REWARD_DEAD -10
+#define REWARD_GROW +10
+
 /* Global variables --------------------------------------------------------- */
 
 typedef struct game
@@ -63,7 +68,7 @@ void game_apply_move(void *game, uint8_t move)
     // Check if dead
     if (!g->snake->is_alive)
     {
-        g->reward = -10;
+        g->reward = REWARD_DEAD;
         return;
     }
 
@@ -76,7 +81,7 @@ void game_apply_move(void *game, uint8_t move)
         {
             snake_grow(g->snake);
             apples_remove(g->apples, pos);
-            g->reward = 10;
+            g->reward = REWARD_GROW;
             break;
         }
     }

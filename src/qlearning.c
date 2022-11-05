@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "qlearning.h"
 
 /* Private typedefs --------------------------------------------------------- */
@@ -158,6 +159,41 @@ void qlearn_update_qvalue(qlearn_t *qlearn, state_t S, action_t a, reward_t R, q
 
     // Update Q value
     qlearn->table[S][a] = Q;
+}
+
+void qlearn_save_table(qlearn_t *qlearn, const char *filename)
+{
+    FILE *fptr = fopen(filename, "w");
+
+    for (uint32_t i = 0; i < qlearn->n_states; i++)
+    {
+        for (uint8_t j = 0; j < qlearn->n_actions; j++)
+        {
+            fprintf(fptr, "%f,", qlearn->table[i][j]);
+        }
+        fprintf(fptr, "\n");
+    }
+
+    fclose(fptr);
+}
+
+void qlearn_load_table(qlearn_t *qlearn, const char *filename)
+{
+    FILE *fptr = fopen(filename, "r");
+
+    char line[100];
+    for (uint32_t i = 0; i < qlearn->n_states; i++)
+    {
+        fgets(line, 100, fptr);
+        char *token = strtok(line, ",");
+        for (uint8_t j = 0; j < qlearn->n_actions; j++)
+        {
+            qlearn->table[j][i] = (float)atof(token);
+            token = strtok(NULL, ",");
+        }
+    }
+
+    fclose(fptr);
 }
 
 /* -------------------------------------------------------------------------- */

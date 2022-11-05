@@ -52,6 +52,8 @@ reward_t qlearn_get_reward(qlearn_t *qlearn);
 qvalue_t qlearn_get_max_qvalue(qlearn_t *qlearn, state_t S);
 action_t qlearn_get_action(qlearn_t *qlearn, state_t S);
 void qlearn_update_qvalue(qlearn_t *qlearn, state_t S, action_t a, reward_t R, qvalue_t Q_max);
+void qlearn_save_table(qlearn_t *qlearn, const char *filename);
+void qlearn_load_table(qlearn_t *qlearn, const char *filename);
 
 #endif /* _QLEARNING_h_ */
 

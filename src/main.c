@@ -1,16 +1,63 @@
 /* Includes ----------------------------------------------------------------- */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
 #include "display.h"
 #include "definitions.h"
 #include "qlearning.h"
 #include "game.h"
 
+/* Global variables --------------------------------------------------------- */
+
+char load_path[50];
+bool load_table = false;
+
+char save_path[50];
+bool save_table = false;
+
+/* Public functions --------------------------------------------------------- */
+
+void parse_arguments(int argc, char *argv[])
+{
+	if (argc == 1)
+		return;
+
+	int i = 1;
+	while (i < argc)
+	{
+		if (!strcmp(argv[i], "-l"))
+		{
+			strcpy(load_path, argv[i + 1]);
+			load_table = true;
+			i += 2;
+		}
+		else if (!strcmp(argv[i], "-s"))
+		{
+			strcpy(save_path, argv[i + 1]);
+			strcat(save_path, "/snake.qtable");
+			save_table = true;
+			i += 2;
+		}
+		else
+		{
+			printf("Unknown argument.\n");
+			exit(EXIT_FAILURE);
+		}
+	}
+}
+
 /* Main function ------------------------------------------------------------ */
 
-int main(void)
+int main(int argc, char *argv[])
 {
+	parse_arguments(argc, argv);
+
+	// Create game window
 	display_init();
+
+	// Create game instance
 	void *game = game_init();
 
 	/* Q-learning initialization -------------------------------------------- */
@@ -30,6 +77,9 @@ int main(void)
 								 .params = &qtable_conf};
 
 	qlearn_t *qlearn = qlearn_init(&qlearn_conf);
+
+	if (load_table)
+		qlearn_load_table(qlearn, load_path);
 
 	/* Main game loop ------------------------------------------------------- */
 
@@ -63,6 +113,11 @@ int main(void)
 			game_obj_t **matrix = game_get_matrix(game);
 			display_update(matrix);
 		}
+
+		/* Save Q-table ----------------------------------------------------- */
+
+		if (save_table)
+			qlearn_save_table(qlearn, save_path);
 
 		/* Reset ------------------------------------------------------------ */
 
