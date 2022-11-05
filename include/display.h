@@ -14,7 +14,7 @@
 void display_init(void);
 void display_deinit(void);
 bool display_exit(void);
-void display_update(game_obj_t **matrix);
+void display_update(game_obj_t **matrix, uint32_t round, uint32_t score);
 
 #endif /* _DISPLAY_H_ */
 

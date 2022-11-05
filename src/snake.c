@@ -95,7 +95,7 @@ void snake_reset(snake_t *snake)
     game_pos_t head_pos = {MATRIX_COLS / 2, MATRIX_ROWS / 2};
     for (uint16_t i = 0; i < SNAKE_INIT_LENGTH; i++)
     {
-        snake->body[i].x = (head_pos.x + i) % MATRIX_COLS;
+        snake->body[i].x = head_pos.x + i;
         snake->body[i].y = head_pos.y;
     }
 }
@@ -153,13 +153,11 @@ void snake_change_dir(snake_t *snake, game_dir_t dir)
 void snake_update(snake_t *snake)
 {
     game_pos_t head = {
-        .x = (MATRIX_COLS + snake->body[0].x + snake->dir.x) % MATRIX_COLS,
-        .y = (MATRIX_ROWS + snake->body[0].y + snake->dir.y) % MATRIX_ROWS};
+        .x = snake->body[0].x + snake->dir.x,
+        .y = snake->body[0].y + snake->dir.y};
 
     for (uint16_t i = snake->length - 1; i > 0; i--)
-    {
         snake->body[i] = snake->body[i - 1];
-    }
 
     snake->body[0] = head;
 
@@ -186,12 +184,10 @@ bool snake_is_alive(snake_t *snake)
     }
 
     // Check if snake head is out of bounds
-    int16_t posx = (int16_t)head.x + snake->dir.x;
-    int16_t posy = (int16_t)head.y + snake->dir.y;
-    if ((posx < 0) || (posx >= MATRIX_COLS))
+    if ((head.x < 0) || (head.x >= MATRIX_COLS))
         return false;
 
-    if ((posy < 0) || (posy >= MATRIX_ROWS))
+    if ((head.y < 0) || (head.y >= MATRIX_ROWS))
         return false;
 
     return true;
@@ -222,8 +218,8 @@ void apples_reset(apples_t *apples)
 
 void apples_add_random(apples_t *apples, game_obj_t **matrix)
 {
-    uint16_t x;
-    uint16_t y;
+    int16_t x;
+    int16_t y;
     uint16_t n_empty = 0;
     for (x = 0; x < MATRIX_COLS; x++)
     {

@@ -21,6 +21,7 @@ uint16_t game_get_state(void *game);
 int16_t game_get_reward(void *game);
 void game_update_matrix(void *game);
 game_obj_t **game_get_matrix(void *game);
+uint32_t game_get_score(void *game);
 
 #endif /* _GAME_H_ */
 

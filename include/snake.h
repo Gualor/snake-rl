@@ -30,8 +30,8 @@ typedef enum move
 
 typedef struct pos
 {
-    uint16_t x;
-    uint16_t y;
+    int16_t x;
+    int16_t y;
 } game_pos_t;
 
 typedef struct dir

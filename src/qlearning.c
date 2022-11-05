@@ -193,6 +193,8 @@ void qlearn_load_table(qlearn_t *qlearn, const char *filename)
         }
     }
 
+    qlearn->epsilon = 0.0;
+
     fclose(fptr);
 }
 

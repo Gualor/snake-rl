@@ -1,9 +1,11 @@
 /* Includes ----------------------------------------------------------------- */
 
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+
 #include "display.h"
 #include "definitions.h"
 #include "qlearning.h"
@@ -83,6 +85,8 @@ int main(int argc, char *argv[])
 
 	/* Main game loop ------------------------------------------------------- */
 
+	uint32_t deaths = 1;
+
 	while (!display_exit())
 	{
 		state_t S = qlearn_get_state(qlearn);
@@ -111,7 +115,9 @@ int main(int argc, char *argv[])
 			/* Draw --------------------------------------------------------- */
 
 			game_obj_t **matrix = game_get_matrix(game);
-			display_update(matrix);
+			uint32_t score = game_get_score(game);
+
+			display_update(matrix, deaths, score);
 		}
 
 		/* Save Q-table ----------------------------------------------------- */
@@ -122,6 +128,7 @@ int main(int argc, char *argv[])
 		/* Reset ------------------------------------------------------------ */
 
 		qlearn_restart(qlearn);
+		deaths++;
 	}
 
 	/* Exit game ------------------------------------------------------------ */

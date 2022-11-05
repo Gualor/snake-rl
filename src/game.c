@@ -111,28 +111,32 @@ uint16_t game_get_state(void *game)
 {
     game_t *g = (game_t *)game;
 
+    // If terminal state, return 0
+    if (!g->snake->is_alive)
+        return 0;
+
     game_pos_t head = g->snake->body[0];
     game_pos_t apple = apples_get_nearest(g->apples, head);
     game_obj_t **matrix = g->matrix;
 
     // Get position around snake head
-    uint16_t up = (head.y + 1) % MATRIX_ROWS;
-    uint16_t down = (MATRIX_ROWS + head.y - 1) % MATRIX_ROWS;
-    uint16_t left = (MATRIX_COLS + head.x - 1) % MATRIX_COLS;
-    uint16_t right = (head.x + 1) % MATRIX_COLS;
+    int16_t up = head.y + 1;
+    int16_t down = head.y - 1;
+    int16_t left = head.x - 1;
+    int16_t right = head.x + 1;
 
     // Compute 8-bit state
     uint8_t state = 0;
-    state |= (apple.y > head.y) << 0;                    // Apple is above
-    state |= (apple.y < head.y) << 1;                    // Apple is below
-    state |= (apple.x < head.x) << 2;                    // Apple is on the left
-    state |= (apple.x > head.x) << 3;                    // Apple is on the right
-    state |= (matrix[head.x][up] == SNAKE_BODY) << 4;    // Obstacle is above
-    state |= (matrix[head.x][down] == SNAKE_BODY) << 5;  // Obstacle is below
-    state |= (matrix[left][head.y] == SNAKE_BODY) << 6;  // Obstace is on the left
-    state |= (matrix[right][head.y] == SNAKE_BODY) << 7; // Obstacle is on theright
+    state |= (apple.y > head.y) << 0;                                                   // Apple is above
+    state |= (apple.y < head.y) << 1;                                                   // Apple is below
+    state |= (apple.x < head.x) << 2;                                                   // Apple is on the left
+    state |= (apple.x > head.x) << 3;                                                   // Apple is on the right
+    state |= ((up >= MATRIX_ROWS) ? 1 : (matrix[head.x][up] == SNAKE_BODY)) << 4;       // Obstacle is above
+    state |= ((down < 0) ? 1 : (matrix[head.x][down] == SNAKE_BODY)) << 5;              // Obstacle is below
+    state |= ((left < 0) ? 1 : (matrix[left][head.y] == SNAKE_BODY)) << 6;              // Obstace is on the left
+    state |= ((right >= MATRIX_COLS) ? 1 : (matrix[right][head.y] == SNAKE_BODY)) << 7; // Obstacle is on the right
 
-    return state;
+    return (uint16_t)state;
 }
 
 int16_t game_get_reward(void *game)
@@ -151,6 +155,12 @@ game_obj_t **game_get_matrix(void *game)
 {
     game_t *g = (game_t *)game;
     return g->matrix;
+}
+
+uint32_t game_get_score(void *game)
+{
+    game_t *g = (game_t *)game;
+    return g->snake->length;
 }
 
 /* -------------------------------------------------------------------------- */

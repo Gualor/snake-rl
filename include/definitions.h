@@ -16,7 +16,7 @@
 #define MATRIX_COLS 32
 #define MATRIX_ROWS 18
 #define APPLES_MAX_NUM 1
-#define SNAKE_INIT_LENGTH 5
+#define SNAKE_INIT_LENGTH 1
 #define SNAKE_MAX_LENGTH (MATRIX_ROWS * MATRIX_COLS)
 
 // Display settings
@@ -25,6 +25,10 @@
 #define SCREEN_HEIGHT 450
 #define PIXEL_WIDTH (SCREEN_WIDTH / MATRIX_COLS)
 #define PIXEL_HEIGHT (SCREEN_HEIGHT / MATRIX_ROWS)
+#define UI_HEIGHT_OFFSET (PIXEL_HEIGHT * 1.15)
+#define UI_FONT_SIZE (PIXEL_HEIGHT * 0.9)
+#define UI_TEXT_MARGIN_Y (PIXEL_HEIGHT * 0.15)
+#define UI_TEXT_MARGIN_X PIXEL_WIDTH
 #define FPS 100
 
 // Color palette
@@ -42,6 +46,10 @@
     (Color) { 0x03, 0xda, 0x59, 0xff }
 #define APPLE_COLOR \
     (Color) { 0xda, 0x03, 0x18, 0xff }
+#define UI_TEXT_COLOR \
+    (Color) { 0xda, 0x03, 0x18, 0xff }
+#define UI_BANNER_COLOR \
+    (Color) { 0x12, 0x12, 0x12, 0xff }
 
 #endif /* _DEFINITIONS_H_ */
 
