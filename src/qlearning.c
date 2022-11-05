@@ -2,8 +2,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
-#include <math.h>
 #include "qlearning.h"
 
 /* Private typedefs --------------------------------------------------------- */
@@ -22,6 +20,7 @@ typedef struct qlearn
     float alpha;
     float gamma;
     float epsilon;
+    float epsilon_rate;
 } qlearn_t;
 
 /* Public functions --------------------------------------------------------- */
@@ -50,7 +49,8 @@ qlearn_t *qlearn_init(qlearn_conf_t *conf)
     qlearn->n_actions = conf->params->n_actions;
     qlearn->alpha = conf->params->alpha;
     qlearn->gamma = conf->params->gamma;
-    qlearn->epsilon = conf->params->epsilon;
+    qlearn->epsilon = 1.0f;
+    qlearn->epsilon_rate = conf->params->epsilon_rate;
 
     return qlearn;
 }
@@ -65,9 +65,10 @@ void qlearn_deinit(qlearn_t *qlearn)
     free(qlearn);
 }
 
-void qlearn_apply_action(qlearn_t *qlearn, action_t a)
+state_t qlearn_apply_action(qlearn_t *qlearn, action_t a)
 {
     qlearn->apply_action(qlearn->game, a);
+    return qlearn_get_state(qlearn);
 }
 
 void qlearn_restart(qlearn_t *qlearn)
@@ -77,7 +78,7 @@ void qlearn_restart(qlearn_t *qlearn)
 
 bool qlearn_is_ended(qlearn_t *qlearn)
 {
-    qlearn->epsilon *= 0.9999f;
+    qlearn->epsilon *= qlearn->epsilon_rate;
     return qlearn->is_ended(qlearn->game);
 }
 
@@ -85,17 +86,18 @@ state_t qlearn_get_state(qlearn_t *qlearn)
 {
     state_t state = qlearn->get_state(qlearn->game);
 
-    printf("Epsilon: %f\tDistance: %d\tU: %c\tD: %c\tL: %c\tR: %c\tUL: %c\tUR: %c\tDL: %c\tDR: %c\n",
+    // Debug log message
+    printf("Epsilon: %f\tReward: %d\tState: %c %c %c %c %c %c %c %c\n",
            qlearn->epsilon,
-           (state >> 8),
-           (state & 0x1) ? 'X' : ' ',
-           (state & 0x2) ? 'X' : ' ',
-           (state & 0x4) ? 'X' : ' ',
-           (state & 0x8) ? 'X' : ' ',
-           (state & 0x10) ? 'X' : ' ',
-           (state & 0x20) ? 'X' : ' ',
-           (state & 0x40) ? 'X' : ' ',
-           (state & 0x80) ? 'X' : ' ');
+           qlearn_get_reward(qlearn),
+           (state & 0x1) ? '1' : '0',
+           (state & 0x2) ? '1' : '0',
+           (state & 0x4) ? '1' : '0',
+           (state & 0x8) ? '1' : '0',
+           (state & 0x10) ? '1' : '0',
+           (state & 0x20) ? '1' : '0',
+           (state & 0x40) ? '1' : '0',
+           (state & 0x80) ? '1' : '0');
 
     return state;
 }

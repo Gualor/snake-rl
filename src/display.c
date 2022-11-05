@@ -1,13 +1,11 @@
 /* Includes ----------------------------------------------------------------- */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdint.h>
 #include "display.h"
 
 /* Private prototypes ------------------------------------------------------- */
 
-void display_draw_objects(game_t *game);
+void display_draw_objects(game_obj_t **matrix);
 void display_draw_background(void);
 void display_draw_grid(void);
 
@@ -15,7 +13,7 @@ void display_draw_grid(void);
 
 void display_init(void)
 {
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Snake RL");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, GAME_TITLE);
     SetTargetFPS(FPS);
 }
 
@@ -29,12 +27,12 @@ bool display_exit(void)
     return WindowShouldClose();
 }
 
-void display_update(game_t *game)
+void display_update(game_obj_t **matrix)
 {
     BeginDrawing();
     // Start drawing
     display_draw_background();
-    display_draw_objects(game);
+    display_draw_objects(matrix);
     display_draw_grid();
     // Stop drawing
     EndDrawing();
@@ -42,10 +40,8 @@ void display_update(game_t *game)
 
 /* Private functions -------------------------------------------------------- */
 
-void display_draw_objects(game_t *game)
+void display_draw_objects(game_obj_t **matrix)
 {
-    game_obj_t **matrix = game_get_matrix(game);
-
     for (uint16_t x = 0; x < MATRIX_COLS; x++)
     {
         for (uint16_t y = 0; y < MATRIX_ROWS; y++)
@@ -131,17 +127,6 @@ void display_draw_grid(void)
     {
         uint16_t h = y * PIXEL_HEIGHT;
         DrawLine(0, h, SCREEN_WIDTH, h, GRID_COLOR);
-    }
-}
-
-void display_reset_matrix(game_obj_t **matrix)
-{
-    for (uint16_t x = 0; x < MATRIX_COLS; x++)
-    {
-        for (uint16_t y = 0; y < MATRIX_ROWS; y++)
-        {
-            matrix[x][y] = EMPTY;
-        }
     }
 }
 

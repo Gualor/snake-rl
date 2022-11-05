@@ -5,17 +5,16 @@
 
 /* Includes ----------------------------------------------------------------- */
 
-#include <stdint.h>
 #include <raylib.h>
 #include "definitions.h"
-#include "game.h"
+#include "snake.h"
 
 /* Public functions --------------------------------------------------------- */
 
 void display_init(void);
 void display_deinit(void);
 bool display_exit(void);
-void display_update(game_t *game);
+void display_update(game_obj_t **matrix);
 
 #endif /* _DISPLAY_H_ */
 

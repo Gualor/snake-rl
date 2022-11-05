@@ -11,9 +11,13 @@
 /* Public typedefs ---------------------------------------------------------- */
 
 typedef float qvalue_t;
+
 typedef int16_t reward_t;
+
 typedef uint16_t state_t;
+
 typedef uint8_t action_t;
+
 typedef struct qlearn qlearn_t;
 
 typedef struct qtable_conf
@@ -22,7 +26,7 @@ typedef struct qtable_conf
     const uint8_t n_actions;
     const float alpha;
     const float gamma;
-    const float epsilon;
+    const float epsilon_rate;
 } qtable_conf_t;
 
 typedef struct qlearn_conf
@@ -40,7 +44,7 @@ typedef struct qlearn_conf
 
 qlearn_t *qlearn_init(qlearn_conf_t *conf);
 void qlearn_deinit(qlearn_t *qlearn);
-void qlearn_apply_action(qlearn_t *qlearn, action_t a);
+state_t qlearn_apply_action(qlearn_t *qlearn, action_t a);
 void qlearn_restart(qlearn_t *qlearn);
 bool qlearn_is_ended(qlearn_t *qlearn);
 state_t qlearn_get_state(qlearn_t *qlearn);
