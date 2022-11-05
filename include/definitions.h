@@ -5,21 +5,30 @@
 
 /* Definitions -------------------------------------------------------------- */
 
-// Q-learning settings
+/**
+ * @brief Q-learning algorithm settings.
+ *
+ */
 #define QLEARN_N_STATES 256
 #define QLEARN_N_ACTIONS 5
 #define QLEARN_ALPHA 0.1f
 #define QLEARN_GAMMA 0.9f
 #define QLEARN_EPSILON_RATE 0.9999f
 
-// Game settings
+/**
+ * @brief Snake game settings.
+ *
+ */
 #define MATRIX_COLS 32
 #define MATRIX_ROWS 18
 #define APPLES_MAX_NUM 1
 #define SNAKE_INIT_LENGTH 1
 #define SNAKE_MAX_LENGTH (MATRIX_ROWS * MATRIX_COLS)
 
-// Display settings
+/**
+ * @brief Game graphics settings.
+ *
+ */
 #define GAME_TITLE (char *)"Snake RL"
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 450
@@ -31,7 +40,10 @@
 #define UI_TEXT_MARGIN_X PIXEL_WIDTH
 #define FPS 100
 
-// Color palette
+/**
+ * @brief Game color palette.
+ *
+ */
 #define RESET_COLOR \
     (Color) { 0x0, 0x0, 0x0, 0x0 }
 #define BACKGROUND_COLOR \

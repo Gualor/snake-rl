@@ -7,11 +7,15 @@
 
 /* Definitions -------------------------------------------------------------- */
 
-#define REWARD_DEAD -10
 #define REWARD_GROW +10
+#define REWARD_DEAD -10
 
-/* Global variables --------------------------------------------------------- */
+/* Private typedefs --------------------------------------------------------- */
 
+/**
+ * @brief Snake game instance.
+ *
+ */
 typedef struct game
 {
     game_obj_t **matrix;
@@ -22,6 +26,11 @@ typedef struct game
 
 /* Public functions --------------------------------------------------------- */
 
+/**
+ * @brief Initialize Snake game.
+ *
+ * @return void*
+ */
 void *game_init(void)
 {
     srandom(time(NULL));
@@ -40,6 +49,11 @@ void *game_init(void)
     return (void *)game;
 }
 
+/**
+ * @brief Deinitialize Snake game.
+ *
+ * @param game Snake game instance.
+ */
 void game_deinit(void *game)
 {
     game_t *g = (game_t *)game;
@@ -49,6 +63,11 @@ void game_deinit(void *game)
     free(game);
 }
 
+/**
+ * @brief Restart Snake game.
+ *
+ * @param game Snake game instance.
+ */
 void game_restart(void *game)
 {
     game_t *g = (game_t *)game;
@@ -57,6 +76,16 @@ void game_restart(void *game)
     game_update_matrix(game);
 }
 
+/**
+ * @brief Move snake.
+ *
+ * @param game Snake game instance.
+ * @param move Snake move: IDLE, UP, DOWN, LEFT, or RIGHT.
+ *
+ * NB: Not all moves may be performed in a given state, e.g., if snake is going
+ * left it cannot perform RIGHT move, only UP, DOWN or IDLE. If snake cannot
+ * perform a move, it will perform IDLE.
+ */
 void game_apply_move(void *game, uint8_t move)
 {
     game_t *g = (game_t *)game;
@@ -97,6 +126,13 @@ void game_apply_move(void *game, uint8_t move)
     }
 }
 
+/**
+ * @brief Check if the game ended (i.e., snake is dead).
+ *
+ * @param game Snake game instance.
+ * @return true
+ * @return false
+ */
 bool game_is_ended(void *game)
 {
     game_t *g = (game_t *)game;
@@ -107,6 +143,12 @@ bool game_is_ended(void *game)
         return true;
 }
 
+/**
+ * @brief Get 8-bit state representation from game instance.
+ *
+ * @param game Snake game instance.
+ * @return uint16_t
+ */
 uint16_t game_get_state(void *game)
 {
     game_t *g = (game_t *)game;
@@ -139,24 +181,47 @@ uint16_t game_get_state(void *game)
     return (uint16_t)state;
 }
 
+/**
+ * @brief Get reward for making last move.
+ *
+ * @param game Snake game instance.
+ * @return int16_t
+ */
 int16_t game_get_reward(void *game)
 {
     game_t *g = (game_t *)game;
     return g->reward;
 }
 
+/**
+ * @brief Update 2D matrix representation of the game state.
+ *
+ * @param game Snake game instance.
+ */
 void game_update_matrix(void *game)
 {
     game_t *g = (game_t *)game;
     matrix_update(g->matrix, g->snake, g->apples);
 }
 
+/**
+ * @brief Get 2D matrix representation of the game state.
+ *
+ * @param game Snake game instance.
+ * @return game_obj_t**
+ */
 game_obj_t **game_get_matrix(void *game)
 {
     game_t *g = (game_t *)game;
     return g->matrix;
 }
 
+/**
+ * @brief Get current game score, i.e., the snake length.
+ *
+ * @param game Snake game instance.
+ * @return uint32_t
+ */
 uint32_t game_get_score(void *game)
 {
     game_t *g = (game_t *)game;

@@ -11,6 +11,11 @@ uint32_t manhattan_distance(game_pos_t pos1, game_pos_t pos2);
 
 /* Matrix functions --------------------------------------------------------- */
 
+/**
+ * @brief Initialize 2D game matrix representation.
+ *
+ * @return game_obj_t**
+ */
 game_obj_t **matrix_init(void)
 {
     game_obj_t **matrix = calloc(MATRIX_COLS, sizeof(game_obj_t *));
@@ -22,6 +27,11 @@ game_obj_t **matrix_init(void)
     return matrix;
 }
 
+/**
+ * @brief Deinitialize 2D game matrix representation.
+ *
+ * @param matrix Game matrix instance.
+ */
 void matrix_deinit(game_obj_t **matrix)
 {
     for (uint16_t i = 0; i < MATRIX_COLS; i++)
@@ -31,6 +41,11 @@ void matrix_deinit(game_obj_t **matrix)
     free(matrix);
 }
 
+/**
+ * @brief Reset 2D game matrix representation.
+ *
+ * @param matrix Game matrix instance.
+ */
 void matrix_reset(game_obj_t **matrix)
 {
     for (uint16_t i = 0; i < MATRIX_COLS; i++)
@@ -42,6 +57,13 @@ void matrix_reset(game_obj_t **matrix)
     }
 }
 
+/**
+ * @brief Update 2D game matrix representation.
+ *
+ * @param matrix Game matrix instance.
+ * @param snake Snake instance.
+ * @param apples Apples instance.
+ */
 void matrix_update(game_obj_t **matrix, snake_t *snake, apples_t *apples)
 {
     game_pos_t pos;
@@ -68,6 +90,11 @@ void matrix_update(game_obj_t **matrix, snake_t *snake, apples_t *apples)
 
 /* Snake functions ---------------------------------------------------------- */
 
+/**
+ * @brief Initialize snake.
+ *
+ * @return snake_t*
+ */
 snake_t *snake_init(void)
 {
     // Create snake
@@ -80,12 +107,22 @@ snake_t *snake_init(void)
     return snake;
 }
 
+/**
+ * @brief Deinitialize snake.
+ *
+ * @param snake Snake instance.
+ */
 void snake_deinit(snake_t *snake)
 {
     free(snake->body);
     free(snake);
 }
 
+/**
+ * @brief Reset snake length and position.
+ *
+ * @param snake Snake instance.
+ */
 void snake_reset(snake_t *snake)
 {
     snake->dir = (game_dir_t){-1, 0};
@@ -100,6 +137,12 @@ void snake_reset(snake_t *snake)
     }
 }
 
+/**
+ * @brief Move snake.
+ *
+ * @param snake Snake instance.
+ * @param move Game move, choose from {IDLE, UP, DOWN, LEFT, RIGHT}.
+ */
 void snake_move(snake_t *snake, game_move_t move)
 {
     game_dir_t dir = {.x = 0, .y = 0};
@@ -138,6 +181,12 @@ void snake_move(snake_t *snake, game_move_t move)
     snake_update(snake);
 }
 
+/**
+ * @brief Change current direction of snake without performing a move.
+ *
+ * @param snake Snake instance.
+ * @param dir New direction.
+ */
 void snake_change_dir(snake_t *snake, game_dir_t dir)
 {
     if ((snake->dir.x != 0) && (dir.x != 0))
@@ -150,6 +199,11 @@ void snake_change_dir(snake_t *snake, game_dir_t dir)
     snake->dir = dir;
 }
 
+/**
+ * @brief Update snake position using its current direction.
+ *
+ * @param snake Snake instance.
+ */
 void snake_update(snake_t *snake)
 {
     game_pos_t head = {
@@ -165,12 +219,28 @@ void snake_update(snake_t *snake)
     snake->is_alive = snake_is_alive(snake);
 }
 
+/**
+ * @brief Grow snake by one block.
+ *
+ * @param snake Snake instance.
+ */
 void snake_grow(snake_t *snake)
 {
     snake->body[snake->length] = snake->body[snake->length - 1];
     snake->length++;
 }
 
+/**
+ * @brief Check if snake is alive.
+ *
+ * NB: Snake is considered alive if:
+ *  -> Head is not intersecting any piece of the body.
+ *  -> Head is not out of bounds.
+ *
+ * @param snake Snake instance
+ * @return true
+ * @return false
+ */
 bool snake_is_alive(snake_t *snake)
 {
     game_pos_t head = snake->body[0];
@@ -195,6 +265,11 @@ bool snake_is_alive(snake_t *snake)
 
 /* Apples functions --------------------------------------------------------- */
 
+/**
+ * @brief Initialize apples.
+ *
+ * @return apples_t*
+ */
 apples_t *apples_init(void)
 {
     // Create apples
@@ -205,17 +280,36 @@ apples_t *apples_init(void)
     return apples;
 }
 
+/**
+ * @brief Deinitialize apples.
+ *
+ * @param apples Apples instance.
+ */
 void apples_deinit(apples_t *apples)
 {
     free(apples->pos);
     free(apples);
 }
 
+/**
+ * @brief Reset all apples.
+ *
+ * @param apples Apples instance.
+ */
 void apples_reset(apples_t *apples)
 {
     apples->num = 0;
 }
 
+/**
+ * @brief Add new apple in a empty random cell.
+ *
+ * NB: Apple cannot spawn in the same location of other apples or where the
+ * snake head and body are.
+ *
+ * @param apples Apples instance.
+ * @param matrix Game matrix.
+ */
 void apples_add_random(apples_t *apples, game_obj_t **matrix)
 {
     int16_t x;
@@ -254,6 +348,12 @@ void apples_add_random(apples_t *apples, game_obj_t **matrix)
     }
 }
 
+/**
+ * @brief Remove an apple given the 2D coordinates.
+ *
+ * @param apples Apples instance.
+ * @param pos 2D game coordinates.
+ */
 void apples_remove(apples_t *apples, game_pos_t pos)
 {
     if (apples->num < 1)
@@ -283,6 +383,13 @@ void apples_remove(apples_t *apples, game_pos_t pos)
     apples->num--;
 }
 
+/**
+ * @brief Get position of the apple closest to the given coordinates.
+ *
+ * @param apples Apples instance.
+ * @param pos 2D game coordinates.
+ * @return game_pos_t
+ */
 game_pos_t apples_get_nearest(apples_t *apples, game_pos_t pos)
 {
     uint16_t apple_idx = 0;
@@ -305,6 +412,13 @@ game_pos_t apples_get_nearest(apples_t *apples, game_pos_t pos)
 
 /* Utility functions -------------------------------------------------------- */
 
+/**
+ * @brief Compute the manhattan distance, i.e., L1 distance, between two points.
+ *
+ * @param pos1 First 2D position.
+ * @param pos2 Second 2D position.
+ * @return uint32_t
+ */
 uint32_t manhattan_distance(game_pos_t pos1, game_pos_t pos2)
 {
     return abs(pos1.x - pos2.x) + abs(pos1.y - pos2.y);
