@@ -1,7 +1,10 @@
 # snake-rl
 Snake learns to survive using reinforcement learning.
 
-![snake_gif](./images/snake.gif)
+<p align="center">
+  <img src="./images/snake.gif" alt="Snake" width="70%"/>
+</p>
+
 
 ## Q-learning algorithm
 [Q-learning](https://en.wikipedia.org/wiki/Q-learning) is a model-free reinforcement learning algorithm to learn the value of an action in a particular state. This is done by means of a look-up table called *Q-table* which stores a quality value *Q* for every pair of state *S* and action *a* to be taken in that state. Meaning that in a given state *S*, the best move *a* is the one associated with the highest *Q* value.
