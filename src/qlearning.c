@@ -273,7 +273,7 @@ void qlearn_load_table(qlearn_t *qlearn, const char *filename)
         char *token = strtok(line, ",");
         for (uint8_t j = 0; j < qlearn->n_actions; j++)
         {
-            qlearn->table[j][i] = (float)atof(token);
+            qlearn->table[i][j] = (float)atof(token);
             token = strtok(NULL, ",");
         }
     }
