@@ -10,7 +10,6 @@ DEPS := $(OBJS:.o=.d)
 
 CC := gcc
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
-# CFLAGS := $(INC_FLAGS) -MMD -MP -Wall -Wextra -O3 -g
 CFLAGS := $(INC_FLAGS) -MMD -MP -Wall -Wextra -g
 LDFLAGS := -lraylib -lm -ldl -lpthread
 
